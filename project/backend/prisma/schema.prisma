@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  email        String?       @unique
+  passwordHash String
+  roleId       String
+  role         Role          @relation(fields: [roleId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // SUPER_ADMIN, OWNER, STAFF
+  description String?
+  users       User[]
+}
+
+model Customer {
+  id             String            @id @default(uuid())
+  name           String
+  phone          String            @unique
+  altPhone       String?
+  email          String?
+  gstNumber      String?
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  addresses      CustomerAddress[]
+  orders         Order[]
+}
+
+model CustomerAddress {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  address    String
+  location   String?  // GPS coords or area name
+  isDefault  Boolean  @default(true)
+}
+
+model Menu {
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  pricePerPlate Float
+  status        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  items         MenuItem[]     @relation("MenuToMenuItem")
+  orders        Order[]
+}
+
+model MenuItem {
+  id          String       @id @default(uuid())
+  name        String
+  category    String       // WELCOME_DRINK, SOUP, STARTER, MAIN_COURSE, DESSERT, etc.
+  isVeg       Boolean      @default(true)
+  price       Float        @default(0.0)
+  description String?
+  available   Boolean      @default(true)
+  menus       Menu[]       @relation("MenuToMenuItem")
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id             String          @id @default(uuid())
+  orderNumber    String          @unique
+  customerId     String
+  customer       Customer        @relation(fields: [customerId], references: [id])
+  menuId         String?         // Links to pre-defined menu
+  menu           Menu?           @relation(fields: [menuId], references: [id])
+  eventDate      DateTime
+  eventType      String?         // e.g. Wedding, Birthday, Corporate
+  venue          String?
+  numberOfPlates Int
+  pricePerPlate  Float
+  deliveryCharges Float          @default(0.0)
+  subtotal       Float
+  discount       Float           @default(0.0)
+  gst            Float           @default(0.0)
+  additionalCost Float           @default(0.0)
+  grandTotal     Float
+  advancePaid    Float           @default(0.0)
+  pendingAmount  Float
+  status         String          @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  items          OrderItem[]
+  bills          Bill[]
+  payments       Payment[]
+  expenses       Expense[]
+  profitAnalysis ProfitAnalysis?
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId    String
+  item      MenuItem @relation(fields: [itemId], references: [id])
+  quantity  Int      @default(1)
+  rate      Float    @default(0.0)
+}
+
+model Bill {
+  id            String    @id @default(uuid())
+  invoiceNumber String    @unique
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id])
+  billDate      DateTime  @default(now())
+  grandTotal    Float
+  amountPaid    Float     @default(0.0)
+  pendingAmount Float
+  pdfUrl        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("UPI") // UPI, CASH, BANK, CARD
+  transactionId String?
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  amount      Float
+  category    String   // GROCERIES, VEGETABLES, TRANSPORT, STAFF_SALARY, MISC
+  vendor      String?
+  date        DateTime @default(now())
+  notes       String?
+  orderId     String?  // Optional link to specific catering order
+  order       Order?   @relation(fields: [orderId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Inventory {
+  id           String   @id @default(uuid())
+  itemName     String   @unique
+  currentStock Float    @default(0.0)
+  unit         String   // KG, LITER, PACKET, PCS
+  lowStockThreshold Float @default(5.0)
+  purchaseCost Float    @default(0.0)
+  supplier     String?
+  updatedAt    DateTime @updatedAt
+}
+
+model ProfitAnalysis {
+  id            String   @id @default(uuid())
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  revenue       Float
+  totalExpense  Float
+  netProfit     Float
+  profitPercent Float
+  updatedAt     DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
