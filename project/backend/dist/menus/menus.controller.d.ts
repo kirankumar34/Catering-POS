@@ -11,7 +11,7 @@ export declare class MenusController {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -20,7 +20,7 @@ export declare class MenusController {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     findAll(search?: string, status?: string, page?: string, limit?: string): Promise<{
@@ -35,7 +35,7 @@ export declare class MenusController {
             updatedAt: Date;
             name: string;
             description: string | null;
-            pricePerPlate: number;
+            pricePerPlate: import("@prisma/client/runtime/library").Decimal;
             status: boolean;
         })[];
         meta: {
@@ -52,7 +52,7 @@ export declare class MenusController {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -61,7 +61,7 @@ export declare class MenusController {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     update(id: string, updateMenuDto: UpdateMenuDto): Promise<{
@@ -71,7 +71,7 @@ export declare class MenusController {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -80,7 +80,7 @@ export declare class MenusController {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     remove(id: string): Promise<{
@@ -89,7 +89,7 @@ export declare class MenusController {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
 }

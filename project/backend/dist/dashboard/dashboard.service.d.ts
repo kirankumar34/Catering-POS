@@ -5,8 +5,8 @@ export declare class DashboardService {
     getSummary(): Promise<{
         kpis: {
             todayOrders: number;
-            todayRevenue: number;
-            pendingPayments: number;
+            todayRevenue: number | import("@prisma/client/runtime/library").Decimal;
+            pendingPayments: number | import("@prisma/client/runtime/library").Decimal;
             completedOrders: number;
             monthlyRevenue: number;
             monthlyExpenses: number;
@@ -29,15 +29,15 @@ export declare class DashboardService {
             eventType: string | null;
             venue: string | null;
             numberOfPlates: number;
-            pricePerPlate: number;
-            deliveryCharges: number;
-            subtotal: number;
-            discount: number;
-            gst: number;
-            additionalCost: number;
-            grandTotal: number;
-            advancePaid: number;
-            pendingAmount: number;
+            pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+            deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+            subtotal: import("@prisma/client/runtime/library").Decimal;
+            discount: import("@prisma/client/runtime/library").Decimal;
+            gst: import("@prisma/client/runtime/library").Decimal;
+            additionalCost: import("@prisma/client/runtime/library").Decimal;
+            grandTotal: import("@prisma/client/runtime/library").Decimal;
+            advancePaid: import("@prisma/client/runtime/library").Decimal;
+            pendingAmount: import("@prisma/client/runtime/library").Decimal;
             status: string;
         })[];
     }>;

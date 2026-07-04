@@ -7,14 +7,14 @@ export declare class PaymentsController {
         order: {
             id: string;
             orderNumber: string;
-            grandTotal: number;
+            grandTotal: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
         id: string;
         createdAt: Date;
         notes: string | null;
         orderId: string;
-        amount: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         paymentDate: Date;
         paymentMethod: string;
         transactionId: string | null;
@@ -33,7 +33,7 @@ export declare class PaymentsController {
             createdAt: Date;
             notes: string | null;
             orderId: string;
-            amount: number;
+            amount: import("@prisma/client/runtime/library").Decimal;
             paymentDate: Date;
             paymentMethod: string;
             transactionId: string | null;
@@ -55,7 +55,7 @@ export declare class PaymentsController {
         createdAt: Date;
         notes: string | null;
         orderId: string;
-        amount: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         paymentDate: Date;
         paymentMethod: string;
         transactionId: string | null;

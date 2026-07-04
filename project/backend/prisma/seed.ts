@@ -29,44 +29,48 @@ async function main() {
   console.log(`Upserted role: ${staffRole.name}`);
 
   // 2. Seed default users
-  const passwordHashAdmin = await bcrypt.hash('admin123', 10);
-  const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      email: 'admin@seisuvai.com',
-      passwordHash: passwordHashAdmin,
-      roleId: superAdminRole.id,
-    },
-  });
-  console.log(`Upserted super admin user: ${adminUser.username}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping default demo user seeding in production.');
+  } else {
+    const passwordHashAdmin = await bcrypt.hash('admin123', 10);
+    const adminUser = await prisma.user.upsert({
+      where: { username: 'admin' },
+      update: {},
+      create: {
+        username: 'admin',
+        email: 'admin@seisuvai.com',
+        passwordHash: passwordHashAdmin,
+        roleId: superAdminRole.id,
+      },
+    });
+    console.log(`Upserted super admin user: ${adminUser.username}`);
 
-  const passwordHashOwner = await bcrypt.hash('owner123', 10);
-  const ownerUser = await prisma.user.upsert({
-    where: { username: 'owner' },
-    update: {},
-    create: {
-      username: 'owner',
-      email: 'owner@seisuvai.com',
-      passwordHash: passwordHashOwner,
-      roleId: ownerRole.id,
-    },
-  });
-  console.log(`Upserted owner user: ${ownerUser.username}`);
+    const passwordHashOwner = await bcrypt.hash('owner123', 10);
+    const ownerUser = await prisma.user.upsert({
+      where: { username: 'owner' },
+      update: {},
+      create: {
+        username: 'owner',
+        email: 'owner@seisuvai.com',
+        passwordHash: passwordHashOwner,
+        roleId: ownerRole.id,
+      },
+    });
+    console.log(`Upserted owner user: ${ownerUser.username}`);
 
-  const passwordHashStaff = await bcrypt.hash('staff123', 10);
-  const staffUser = await prisma.user.upsert({
-    where: { username: 'staff' },
-    update: {},
-    create: {
-      username: 'staff',
-      email: 'staff@seisuvai.com',
-      passwordHash: passwordHashStaff,
-      roleId: staffRole.id,
-    },
-  });
-  console.log(`Upserted staff user: ${staffUser.username}`);
+    const passwordHashStaff = await bcrypt.hash('staff123', 10);
+    const staffUser = await prisma.user.upsert({
+      where: { username: 'staff' },
+      update: {},
+      create: {
+        username: 'staff',
+        email: 'staff@seisuvai.com',
+        passwordHash: passwordHashStaff,
+        roleId: staffRole.id,
+      },
+    });
+    console.log(`Upserted staff user: ${staffUser.username}`);
+  }
 
   // 3. Seed default checklist templates
   const templateCount = await prisma.checklistTemplate.count();

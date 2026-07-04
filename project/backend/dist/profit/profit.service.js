@@ -24,8 +24,8 @@ let ProfitService = class ProfitService {
         });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
-        const revenue = order.grandTotal;
-        const totalExpense = order.expenses.reduce((sum, e) => sum + e.amount, 0);
+        const revenue = Number(order.grandTotal);
+        const totalExpense = order.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
         const netProfit = revenue - totalExpense;
         const profitPercent = revenue > 0 ? (netProfit / revenue) * 100 : 0;
         const analysis = await this.prisma.profitAnalysis.upsert({
@@ -51,8 +51,8 @@ let ProfitService = class ProfitService {
             this.prisma.expense.aggregate({ _sum: { amount: true } }),
             this.prisma.profitAnalysis.aggregate({ _sum: { netProfit: true, totalExpense: true } }),
         ]);
-        const totalRevenue = orders._sum.grandTotal || 0;
-        const totalExpenses = expenses._sum.amount || 0;
+        const totalRevenue = Number(orders._sum.grandTotal || 0);
+        const totalExpenses = Number(expenses._sum.amount || 0);
         const netProfit = totalRevenue - totalExpenses;
         const profitPercent = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
         return { totalRevenue, totalExpenses, netProfit, profitPercent };

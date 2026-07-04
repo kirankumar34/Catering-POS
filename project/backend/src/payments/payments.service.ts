@@ -24,12 +24,12 @@ export class PaymentsService {
 
     // Recalculate pendingAmount on the order
     const allPayments = await this.prisma.payment.findMany({ where: { orderId: dto.orderId } });
-    const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+    const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     await this.prisma.order.update({
       where: { id: dto.orderId },
       data: {
         advancePaid: totalPaid,
-        pendingAmount: Math.max(order.grandTotal - totalPaid, 0),
+        pendingAmount: Math.max(Number(order.grandTotal) - totalPaid, 0),
       },
     });
 
@@ -76,10 +76,10 @@ export class PaymentsService {
     const order = await this.prisma.order.findUnique({ where: { id: payment.orderId } });
     if (order) {
       const remaining = await this.prisma.payment.findMany({ where: { orderId: payment.orderId } });
-      const totalPaid = remaining.reduce((sum, p) => sum + p.amount, 0);
+      const totalPaid = remaining.reduce((sum, p) => sum + Number(p.amount), 0);
       await this.prisma.order.update({
         where: { id: payment.orderId },
-        data: { advancePaid: totalPaid, pendingAmount: Math.max(order.grandTotal - totalPaid, 0) },
+        data: { advancePaid: totalPaid, pendingAmount: Math.max(Number(order.grandTotal) - totalPaid, 0) },
       });
     }
     return { message: 'Payment deleted successfully' };

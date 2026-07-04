@@ -56,7 +56,7 @@ model Menu {
   id            String         @id @default(uuid())
   name          String
   description   String?
-  pricePerPlate Float
+  pricePerPlate Decimal @db.Decimal(10, 2)
   status        Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -69,7 +69,7 @@ model MenuItem {
   name        String
   category    String       // WELCOME_DRINK, SOUP, STARTER, MAIN_COURSE, DESSERT, etc.
   isVeg       Boolean      @default(true)
-  price       Float        @default(0.0)
+  price       Decimal      @db.Decimal(10, 2) @default(0.0)
   description String?
   available   Boolean      @default(true)
   menus       Menu[]       @relation("MenuToMenuItem")
@@ -87,15 +87,15 @@ model Order {
   eventType      String?         // e.g. Wedding, Birthday, Corporate
   venue          String?
   numberOfPlates Int
-  pricePerPlate  Float
-  deliveryCharges Float          @default(0.0)
-  subtotal       Float
-  discount       Float           @default(0.0)
-  gst            Float           @default(0.0)
-  additionalCost Float           @default(0.0)
-  grandTotal     Float
-  advancePaid    Float           @default(0.0)
-  pendingAmount  Float
+  pricePerPlate  Decimal         @db.Decimal(10, 2)
+  deliveryCharges Decimal        @db.Decimal(10, 2) @default(0.0)
+  subtotal       Decimal         @db.Decimal(12, 2)
+  discount       Decimal         @db.Decimal(5, 2) @default(0.0)
+  gst            Decimal         @db.Decimal(5, 2) @default(0.0)
+  additionalCost Decimal         @db.Decimal(10, 2) @default(0.0)
+  grandTotal     Decimal         @db.Decimal(12, 2)
+  advancePaid    Decimal         @db.Decimal(12, 2) @default(0.0)
+  pendingAmount  Decimal         @db.Decimal(12, 2)
   status         String          @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
   notes          String?
   createdAt      DateTime        @default(now())
@@ -120,7 +120,7 @@ model OrderItem {
   itemId    String
   item      MenuItem @relation(fields: [itemId], references: [id])
   quantity  Int      @default(1)
-  rate      Float    @default(0.0)
+  rate      Decimal  @db.Decimal(10, 2) @default(0.0)
 }
 
 model Bill {
@@ -129,9 +129,9 @@ model Bill {
   orderId       String
   order         Order     @relation(fields: [orderId], references: [id])
   billDate      DateTime  @default(now())
-  grandTotal    Float
-  amountPaid    Float     @default(0.0)
-  pendingAmount Float
+  grandTotal    Decimal   @db.Decimal(12, 2)
+  amountPaid    Decimal   @db.Decimal(12, 2) @default(0.0)
+  pendingAmount Decimal   @db.Decimal(12, 2)
   pdfUrl        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -143,7 +143,7 @@ model Payment {
   id            String   @id @default(uuid())
   orderId       String
   order         Order    @relation(fields: [orderId], references: [id])
-  amount        Float
+  amount        Decimal  @db.Decimal(12, 2)
   paymentDate   DateTime @default(now())
   paymentMethod String   @default("UPI") // UPI, CASH, BANK, CARD
   transactionId String?
@@ -153,7 +153,7 @@ model Payment {
 
 model Expense {
   id          String   @id @default(uuid())
-  amount      Float
+  amount      Decimal  @db.Decimal(12, 2)
   category    String   // GROCERIES, VEGETABLES, TRANSPORT, STAFF_SALARY, MISC
   vendor      String?
   date        DateTime @default(now())
@@ -169,7 +169,7 @@ model Inventory {
   currentStock Float    @default(0.0)
   unit         String   // KG, LITER, PACKET, PCS
   lowStockThreshold Float @default(5.0)
-  purchaseCost Float    @default(0.0)
+  purchaseCost Decimal  @db.Decimal(10, 2) @default(0.0)
   supplier     String?
   updatedAt    DateTime @updatedAt
 }
@@ -178,10 +178,10 @@ model ProfitAnalysis {
   id            String   @id @default(uuid())
   orderId       String   @unique
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  revenue       Float
-  totalExpense  Float
-  netProfit     Float
-  profitPercent Float
+  revenue       Decimal  @db.Decimal(12, 2)
+  totalExpense  Decimal  @db.Decimal(12, 2)
+  netProfit     Decimal  @db.Decimal(12, 2)
+  profitPercent Decimal  @db.Decimal(5, 2)
   updatedAt     DateTime @updatedAt
 }
 

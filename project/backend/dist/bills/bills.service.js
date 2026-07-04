@@ -129,7 +129,7 @@ let BillsService = class BillsService {
             const year = new Date().getFullYear();
             docNumber = `QTN-${year}-${order.orderNumber.split('-').pop()}`;
         }
-        const upiLink = `upi://pay?pa=${bizUpiId}&pn=${encodeURIComponent(getSetting('bankAccountName', bizName))}&am=${order.pendingAmount > 0 ? order.pendingAmount : order.grandTotal}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
+        const upiLink = `upi://pay?pa=${bizUpiId}&pn=${encodeURIComponent(getSetting('bankAccountName', bizName))}&am=${Number(order.pendingAmount) > 0 ? Number(order.pendingAmount) : Number(order.grandTotal)}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
         let qrBuffer = null;
         try {
             const qrDataUrl = await QRCode.toDataURL(upiLink, { width: 120, margin: 1 });
@@ -306,8 +306,8 @@ let BillsService = class BillsService {
                 name: `Menu: ${order.menu.name}`,
                 description: combinedDesc || undefined,
                 qty: order.numberOfPlates,
-                rate: order.pricePerPlate,
-                amount: order.numberOfPlates * order.pricePerPlate,
+                rate: Number(order.pricePerPlate),
+                amount: order.numberOfPlates * Number(order.pricePerPlate),
             });
         }
         if (order.items.length > 0) {
@@ -316,8 +316,8 @@ let BillsService = class BillsService {
                     name: oi.item.name,
                     description: oi.item.description || undefined,
                     qty: oi.quantity,
-                    rate: oi.rate,
-                    amount: oi.quantity * oi.rate,
+                    rate: Number(oi.rate),
+                    amount: oi.quantity * Number(oi.rate),
                 });
             }
         }
@@ -325,8 +325,8 @@ let BillsService = class BillsService {
             displayItems.push({
                 name: order.menu?.name || 'Catering Services',
                 qty: order.numberOfPlates,
-                rate: order.pricePerPlate,
-                amount: order.subtotal,
+                rate: Number(order.pricePerPlate),
+                amount: Number(order.subtotal),
             });
         }
         const tableRowsStartY = y;
@@ -362,22 +362,27 @@ let BillsService = class BillsService {
         const totalsX = tableX + tableW * 0.55;
         const totalsW = tableW * 0.45;
         const totRowH = 13;
-        const deliveryCharges = order.deliveryCharges || 0;
-        const discountAmt = (order.subtotal * order.discount) / 100;
-        const subtotalAfterDiscount = order.subtotal - discountAmt;
-        const gstAmt = (subtotalAfterDiscount * order.gst) / 100;
+        const subtotal = Number(order.subtotal);
+        const discount = Number(order.discount);
+        const gst = Number(order.gst);
+        const additionalCost = Number(order.additionalCost);
+        const grandTotal = Number(order.grandTotal);
+        const deliveryCharges = Number(order.deliveryCharges || 0);
+        const discountAmt = (subtotal * discount) / 100;
+        const subtotalAfterDiscount = subtotal - discountAmt;
+        const gstAmt = (subtotalAfterDiscount * gst) / 100;
         const totalsRows = [
-            { label: 'SUBTOTAL', value: `Rs. ${order.subtotal.toLocaleString('en-IN')}` },
+            { label: 'SUBTOTAL', value: `Rs. ${subtotal.toLocaleString('en-IN')}` },
             { label: 'DELIVERY CHARGES', value: deliveryCharges > 0 ? `Rs. ${deliveryCharges.toLocaleString('en-IN')}` : 'Rs. 0' },
-            { label: 'ADDITIONAL CHARGES', value: order.additionalCost > 0 ? `Rs. ${order.additionalCost.toLocaleString('en-IN')}` : 'Rs. 0' },
+            { label: 'ADDITIONAL CHARGES', value: additionalCost > 0 ? `Rs. ${additionalCost.toLocaleString('en-IN')}` : 'Rs. 0' },
         ];
-        if (order.gst > 0) {
-            totalsRows.push({ label: `GST (${order.gst}%)`, value: `Rs. ${gstAmt.toLocaleString('en-IN')}` });
+        if (gst > 0) {
+            totalsRows.push({ label: `GST (${gst}%)`, value: `Rs. ${gstAmt.toLocaleString('en-IN')}` });
         }
-        if (order.discount > 0) {
+        if (discount > 0) {
             totalsRows.push({ label: 'DISCOUNT', value: `- Rs. ${discountAmt.toLocaleString('en-IN')}` });
         }
-        totalsRows.push({ label: 'GRAND TOTAL', value: `Rs. ${order.grandTotal.toLocaleString('en-IN')}`, bold: true, gold: true });
+        totalsRows.push({ label: 'GRAND TOTAL', value: `Rs. ${grandTotal.toLocaleString('en-IN')}`, bold: true, gold: true });
         const totalsHeight = totalsRows.length * totRowH;
         doc.rect(totalsX, y, totalsW, totalsHeight).strokeColor(GOLD).lineWidth(0.5).stroke();
         for (let i = 0; i < totalsRows.length; i++) {

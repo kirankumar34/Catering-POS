@@ -69,7 +69,7 @@ export class DashboardService {
         amount: true,
       },
     });
-    const monthlyRevenue = monthlyPayments._sum.amount || 0;
+    const monthlyRevenue = Number(monthlyPayments._sum.amount || 0);
 
     // 6. Monthly Expenses
     const monthlyExpensesAgg = await this.prisma.expense.aggregate({
@@ -83,7 +83,7 @@ export class DashboardService {
         amount: true,
       },
     });
-    const monthlyExpenses = monthlyExpensesAgg._sum.amount || 0;
+    const monthlyExpenses = Number(monthlyExpensesAgg._sum.amount || 0);
 
     // 7. Profit (Estimate or Sum from ProfitAnalysis)
     const monthlyProfitAgg = await this.prisma.profitAnalysis.aggregate({
@@ -99,7 +99,7 @@ export class DashboardService {
         netProfit: true,
       },
     });
-    const monthlyProfit = monthlyProfitAgg._sum.netProfit || (monthlyRevenue - monthlyExpenses);
+    const monthlyProfit = Number(monthlyProfitAgg._sum.netProfit || (monthlyRevenue - monthlyExpenses));
 
     // 8. Upcoming Events (Next 5 events)
     const upcomingEvents = await this.prisma.order.findMany({
@@ -186,8 +186,8 @@ export class DashboardService {
         },
       });
 
-      const revenue = revAgg._sum.amount || 0;
-      const expenses = expAgg._sum.amount || 0;
+      const revenue = Number(revAgg._sum.amount || 0);
+      const expenses = Number(expAgg._sum.amount || 0);
       const profit = Math.max(0, revenue - expenses);
 
       chartData.push({

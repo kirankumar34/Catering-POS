@@ -27,7 +27,7 @@ export declare class OrdersService {
             orderId: string;
             itemId: string;
             quantity: number;
-            rate: number;
+            rate: import("@prisma/client/runtime/library").Decimal;
         })[];
     } & {
         id: string;
@@ -41,15 +41,15 @@ export declare class OrdersService {
         eventType: string | null;
         venue: string | null;
         numberOfPlates: number;
-        pricePerPlate: number;
-        deliveryCharges: number;
-        subtotal: number;
-        discount: number;
-        gst: number;
-        additionalCost: number;
-        grandTotal: number;
-        advancePaid: number;
-        pendingAmount: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+        deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+        subtotal: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+        gst: import("@prisma/client/runtime/library").Decimal;
+        additionalCost: import("@prisma/client/runtime/library").Decimal;
+        grandTotal: import("@prisma/client/runtime/library").Decimal;
+        advancePaid: import("@prisma/client/runtime/library").Decimal;
+        pendingAmount: import("@prisma/client/runtime/library").Decimal;
         status: string;
     }>;
     findAll(query: {
@@ -84,15 +84,15 @@ export declare class OrdersService {
             eventType: string | null;
             venue: string | null;
             numberOfPlates: number;
-            pricePerPlate: number;
-            deliveryCharges: number;
-            subtotal: number;
-            discount: number;
-            gst: number;
-            additionalCost: number;
-            grandTotal: number;
-            advancePaid: number;
-            pendingAmount: number;
+            pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+            deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+            subtotal: import("@prisma/client/runtime/library").Decimal;
+            discount: import("@prisma/client/runtime/library").Decimal;
+            gst: import("@prisma/client/runtime/library").Decimal;
+            additionalCost: import("@prisma/client/runtime/library").Decimal;
+            grandTotal: import("@prisma/client/runtime/library").Decimal;
+            advancePaid: import("@prisma/client/runtime/library").Decimal;
+            pendingAmount: import("@prisma/client/runtime/library").Decimal;
             status: string;
         })[];
         meta: {
@@ -135,28 +135,28 @@ export declare class OrdersService {
             updatedAt: Date;
             name: string;
             description: string | null;
-            pricePerPlate: number;
+            pricePerPlate: import("@prisma/client/runtime/library").Decimal;
             status: boolean;
         }) | null;
         profitAnalysis: {
             id: string;
             updatedAt: Date;
             orderId: string;
-            netProfit: number;
-            revenue: number;
-            totalExpense: number;
-            profitPercent: number;
+            netProfit: import("@prisma/client/runtime/library").Decimal;
+            revenue: import("@prisma/client/runtime/library").Decimal;
+            totalExpense: import("@prisma/client/runtime/library").Decimal;
+            profitPercent: import("@prisma/client/runtime/library").Decimal;
         } | null;
         bills: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            grandTotal: number;
-            pendingAmount: number;
+            grandTotal: import("@prisma/client/runtime/library").Decimal;
+            pendingAmount: import("@prisma/client/runtime/library").Decimal;
             invoiceNumber: string;
             orderId: string;
             billDate: Date;
-            amountPaid: number;
+            amountPaid: import("@prisma/client/runtime/library").Decimal;
             pdfUrl: string | null;
         }[];
         payments: {
@@ -164,7 +164,7 @@ export declare class OrdersService {
             createdAt: Date;
             notes: string | null;
             orderId: string;
-            amount: number;
+            amount: import("@prisma/client/runtime/library").Decimal;
             paymentDate: Date;
             paymentMethod: string;
             transactionId: string | null;
@@ -181,14 +181,14 @@ export declare class OrdersService {
             orderId: string;
             itemId: string;
             quantity: number;
-            rate: number;
+            rate: import("@prisma/client/runtime/library").Decimal;
         })[];
         expenses: {
             id: string;
             createdAt: Date;
             notes: string | null;
             orderId: string | null;
-            amount: number;
+            amount: import("@prisma/client/runtime/library").Decimal;
             category: string;
             date: Date;
             vendor: string | null;
@@ -205,15 +205,15 @@ export declare class OrdersService {
         eventType: string | null;
         venue: string | null;
         numberOfPlates: number;
-        pricePerPlate: number;
-        deliveryCharges: number;
-        subtotal: number;
-        discount: number;
-        gst: number;
-        additionalCost: number;
-        grandTotal: number;
-        advancePaid: number;
-        pendingAmount: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+        deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+        subtotal: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+        gst: import("@prisma/client/runtime/library").Decimal;
+        additionalCost: import("@prisma/client/runtime/library").Decimal;
+        grandTotal: import("@prisma/client/runtime/library").Decimal;
+        advancePaid: import("@prisma/client/runtime/library").Decimal;
+        pendingAmount: import("@prisma/client/runtime/library").Decimal;
         status: string;
     }>;
     update(id: string, dto: UpdateOrderDto): Promise<{
@@ -237,7 +237,7 @@ export declare class OrdersService {
             orderId: string;
             itemId: string;
             quantity: number;
-            rate: number;
+            rate: import("@prisma/client/runtime/library").Decimal;
         })[];
     } & {
         id: string;
@@ -251,15 +251,15 @@ export declare class OrdersService {
         eventType: string | null;
         venue: string | null;
         numberOfPlates: number;
-        pricePerPlate: number;
-        deliveryCharges: number;
-        subtotal: number;
-        discount: number;
-        gst: number;
-        additionalCost: number;
-        grandTotal: number;
-        advancePaid: number;
-        pendingAmount: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+        deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+        subtotal: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+        gst: import("@prisma/client/runtime/library").Decimal;
+        additionalCost: import("@prisma/client/runtime/library").Decimal;
+        grandTotal: import("@prisma/client/runtime/library").Decimal;
+        advancePaid: import("@prisma/client/runtime/library").Decimal;
+        pendingAmount: import("@prisma/client/runtime/library").Decimal;
         status: string;
     }>;
     updateStatus(id: string, status: string): Promise<{
@@ -279,15 +279,15 @@ export declare class OrdersService {
         eventType: string | null;
         venue: string | null;
         numberOfPlates: number;
-        pricePerPlate: number;
-        deliveryCharges: number;
-        subtotal: number;
-        discount: number;
-        gst: number;
-        additionalCost: number;
-        grandTotal: number;
-        advancePaid: number;
-        pendingAmount: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
+        deliveryCharges: import("@prisma/client/runtime/library").Decimal;
+        subtotal: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+        gst: import("@prisma/client/runtime/library").Decimal;
+        additionalCost: import("@prisma/client/runtime/library").Decimal;
+        grandTotal: import("@prisma/client/runtime/library").Decimal;
+        advancePaid: import("@prisma/client/runtime/library").Decimal;
+        pendingAmount: import("@prisma/client/runtime/library").Decimal;
         status: string;
     }>;
     remove(id: string): Promise<{

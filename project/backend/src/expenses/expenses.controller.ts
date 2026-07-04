@@ -3,6 +3,8 @@ import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('expenses')
@@ -31,5 +33,7 @@ export class ExpensesController {
   update(@Param('id') id: string, @Body() dto: UpdateExpenseDto) { return this.expensesService.update(id, dto); }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('OWNER', 'SUPER_ADMIN')
   remove(@Param('id') id: string) { return this.expensesService.remove(id); }
 }

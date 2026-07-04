@@ -10,7 +10,7 @@ export declare class MenuItemsController {
         description: string | null;
         category: string;
         isVeg: boolean;
-        price: number;
+        price: import("@prisma/client/runtime/library").Decimal;
         available: boolean;
     }>;
     findAll(search?: string, category?: string, page?: string, limit?: string): Promise<{
@@ -20,7 +20,7 @@ export declare class MenuItemsController {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
         meta: {
@@ -41,7 +41,7 @@ export declare class MenuItemsController {
         description: string | null;
         category: string;
         isVeg: boolean;
-        price: number;
+        price: import("@prisma/client/runtime/library").Decimal;
         available: boolean;
     }>;
     update(id: string, updateMenuItemDto: UpdateMenuItemDto): Promise<{
@@ -50,7 +50,7 @@ export declare class MenuItemsController {
         description: string | null;
         category: string;
         isVeg: boolean;
-        price: number;
+        price: import("@prisma/client/runtime/library").Decimal;
         available: boolean;
     }>;
     remove(id: string): Promise<{
@@ -59,7 +59,7 @@ export declare class MenuItemsController {
         description: string | null;
         category: string;
         isVeg: boolean;
-        price: number;
+        price: import("@prisma/client/runtime/library").Decimal;
         available: boolean;
     }>;
 }

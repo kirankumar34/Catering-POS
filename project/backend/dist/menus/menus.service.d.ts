@@ -11,7 +11,7 @@ export declare class MenusService {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -20,7 +20,7 @@ export declare class MenusService {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     findAll(query: {
@@ -40,7 +40,7 @@ export declare class MenusService {
             updatedAt: Date;
             name: string;
             description: string | null;
-            pricePerPlate: number;
+            pricePerPlate: import("@prisma/client/runtime/library").Decimal;
             status: boolean;
         })[];
         meta: {
@@ -57,7 +57,7 @@ export declare class MenusService {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -66,7 +66,7 @@ export declare class MenusService {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     update(id: string, updateMenuDto: UpdateMenuDto): Promise<{
@@ -76,7 +76,7 @@ export declare class MenusService {
             description: string | null;
             category: string;
             isVeg: boolean;
-            price: number;
+            price: import("@prisma/client/runtime/library").Decimal;
             available: boolean;
         }[];
     } & {
@@ -85,7 +85,7 @@ export declare class MenusService {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
     remove(id: string): Promise<{
@@ -94,7 +94,7 @@ export declare class MenusService {
         updatedAt: Date;
         name: string;
         description: string | null;
-        pricePerPlate: number;
+        pricePerPlate: import("@prisma/client/runtime/library").Decimal;
         status: boolean;
     }>;
 }

@@ -208,12 +208,12 @@ export class OrdersService {
     }
 
     const numberOfPlates = dto.numberOfPlates ?? existing.numberOfPlates;
-    const pricePerPlate = dto.pricePerPlate ?? existing.pricePerPlate;
-    const discount = dto.discount ?? existing.discount;
-    const gst = dto.gst ?? existing.gst;
-    const additionalCost = dto.additionalCost ?? existing.additionalCost;
-    const deliveryCharges = dto.deliveryCharges ?? existing.deliveryCharges;
-    const advancePaid = dto.advancePaid ?? existing.advancePaid;
+    const pricePerPlate = Number(dto.pricePerPlate ?? existing.pricePerPlate);
+    const discount = Number(dto.discount ?? existing.discount);
+    const gst = Number(dto.gst ?? existing.gst);
+    const additionalCost = Number(dto.additionalCost ?? existing.additionalCost);
+    const deliveryCharges = Number(dto.deliveryCharges ?? existing.deliveryCharges);
+    const advancePaid = Number(dto.advancePaid ?? existing.advancePaid);
 
     const { subtotal, grandTotal, pendingAmount } = this.calculateTotals(
       numberOfPlates,

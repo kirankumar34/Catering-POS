@@ -144,8 +144,8 @@ export class CustomersService {
     let pendingBalance = 0;
 
     customer.orders.forEach(order => {
-      totalSpending += order.grandTotal;
-      pendingBalance += order.pendingAmount;
+      totalSpending += Number(order.grandTotal);
+      pendingBalance += Number(order.pendingAmount);
     });
 
     return {

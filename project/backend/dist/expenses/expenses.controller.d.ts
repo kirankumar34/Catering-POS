@@ -14,7 +14,7 @@ export declare class ExpensesController {
         createdAt: Date;
         notes: string | null;
         orderId: string | null;
-        amount: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         category: string;
         date: Date;
         vendor: string | null;
@@ -30,7 +30,7 @@ export declare class ExpensesController {
             createdAt: Date;
             notes: string | null;
             orderId: string | null;
-            amount: number;
+            amount: import("@prisma/client/runtime/library").Decimal;
             category: string;
             date: Date;
             vendor: string | null;
@@ -57,7 +57,7 @@ export declare class ExpensesController {
         createdAt: Date;
         notes: string | null;
         orderId: string | null;
-        amount: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         category: string;
         date: Date;
         vendor: string | null;
@@ -72,7 +72,7 @@ export declare class ExpensesController {
         createdAt: Date;
         notes: string | null;
         orderId: string | null;
-        amount: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         category: string;
         date: Date;
         vendor: string | null;

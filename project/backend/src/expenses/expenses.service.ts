@@ -94,10 +94,10 @@ export class ExpensesService {
   async getSummary(orderId?: string) {
     const where = orderId ? { orderId } : {};
     const expenses = await this.prisma.expense.findMany({ where });
-    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const byCategory: Record<string, number> = {};
     expenses.forEach(e => {
-      byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
+      byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
     });
     return { total, count: expenses.length, byCategory };
   }

@@ -10,7 +10,7 @@ export declare class InventoryController {
         currentStock: number;
         unit: string;
         lowStockThreshold: number;
-        purchaseCost: number;
+        purchaseCost: import("@prisma/client/runtime/library").Decimal;
         supplier: string | null;
     }>;
     findAll(page: number, limit: number, search?: string, lowStock?: boolean): Promise<{
@@ -22,7 +22,7 @@ export declare class InventoryController {
             currentStock: number;
             unit: string;
             lowStockThreshold: number;
-            purchaseCost: number;
+            purchaseCost: import("@prisma/client/runtime/library").Decimal;
             supplier: string | null;
         }[];
         meta: {
@@ -41,7 +41,7 @@ export declare class InventoryController {
         currentStock: number;
         unit: string;
         lowStockThreshold: number;
-        purchaseCost: number;
+        purchaseCost: import("@prisma/client/runtime/library").Decimal;
         supplier: string | null;
     }>;
     update(id: string, dto: UpdateInventoryDto): Promise<{
@@ -51,7 +51,7 @@ export declare class InventoryController {
         currentStock: number;
         unit: string;
         lowStockThreshold: number;
-        purchaseCost: number;
+        purchaseCost: import("@prisma/client/runtime/library").Decimal;
         supplier: string | null;
     }>;
     adjustStock(id: string, delta: number): Promise<{
@@ -61,7 +61,7 @@ export declare class InventoryController {
         currentStock: number;
         unit: string;
         lowStockThreshold: number;
-        purchaseCost: number;
+        purchaseCost: import("@prisma/client/runtime/library").Decimal;
         supplier: string | null;
     }>;
     remove(id: string): Promise<{
