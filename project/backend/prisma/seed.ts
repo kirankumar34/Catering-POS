@@ -1,11 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import * as bcrypt from 'bcrypt';
-import * as path from 'node:path';
 
-const dbPath = path.resolve(__dirname, 'dev.db');
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
@@ -71,6 +67,48 @@ async function main() {
     },
   });
   console.log(`Upserted staff user: ${staffUser.username}`);
+
+  // 3. Seed default checklist templates
+  const templateCount = await prisma.checklistTemplate.count();
+  if (templateCount === 0) {
+    console.log('Seeding checklist templates...');
+    const standardPrep = await prisma.checklistTemplate.create({
+      data: {
+        name: 'Standard Event Prep',
+        items: {
+          create: [
+            { label: 'Verify advance payment collected', orderIndex: 0 },
+            { label: 'Confirm final menu and pax count', orderIndex: 1 },
+            { label: 'Procure ingredients and raw materials', orderIndex: 2 },
+            { label: 'Assign service and cooking staff', orderIndex: 3 },
+            { label: 'Pack catering equipment & utensils', orderIndex: 4 },
+            { label: 'Arrange transportation to venue', orderIndex: 5 },
+            { label: 'Setup food counters and warmers', orderIndex: 6 },
+            { label: 'Verify food quality and taste before service', orderIndex: 7 },
+            { label: 'Collect feedback and final payment', orderIndex: 8 },
+          ],
+        },
+      },
+    });
+    console.log(`Upserted checklist template: ${standardPrep.name}`);
+
+    const vipPrep = await prisma.checklistTemplate.create({
+      data: {
+        name: 'VVIP Premium Event Prep',
+        items: {
+          create: [
+            { label: 'Confirm VIP menu custom preferences', orderIndex: 0 },
+            { label: 'Arrange premium table linens & chinaware', orderIndex: 1 },
+            { label: 'Schedule pre-service tasting session', orderIndex: 2 },
+            { label: 'Appoint senior hospitality supervisors', orderIndex: 3 },
+            { label: 'Deploy dedicated live counters', orderIndex: 4 },
+            { label: 'Organize high-grade dessert presentation', orderIndex: 5 },
+          ],
+        },
+      },
+    });
+    console.log(`Upserted checklist template: ${vipPrep.name}`);
+  }
 
   console.log('Seeding completed successfully!');
 }

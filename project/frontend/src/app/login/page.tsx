@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
 import axios from 'axios';
 import { Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import GoldCornerAccent from '../../components/ui/GoldCornerAccent';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -73,19 +74,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
-      {/* Background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-secondary">
+      {/* Warm background accents — no blur/glassmorphism */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-accent/8 pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/6 pointer-events-none" />
 
       {/* Login Card */}
-      <div className="w-full max-w-md glass-panel rounded-2xl p-8 shadow-2xl relative z-10 transition-all duration-300 hover:shadow-primary/5">
+      <div className="w-full max-w-md card-base rounded-xl p-8 shadow-lg relative z-10">
+        {/* Gold corner ornament — signature element (A4) */}
+        <GoldCornerAccent position="top-right" size={56} />
+        <GoldCornerAccent position="bottom-left" size={56} />
+
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight font-display bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">
+          {/* Brand monogram */}
+          <div className="mx-auto w-14 h-14 rounded-full bg-primary flex items-center justify-center mb-4">
+            <span className="text-primary-foreground font-display font-bold text-2xl">S</span>
+          </div>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
             Seisuvai
           </h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Catering Billing & Business Management System
+            Catering Billing & Business Management
           </p>
         </div>
 
@@ -95,7 +104,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Username Input */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-muted-foreground">
@@ -107,9 +116,9 @@ export default function LoginPage() {
               </span>
               <input
                 type="text"
-                placeholder="Enter username (e.g. admin)"
+                placeholder="Enter your username"
                 {...register('username')}
-                className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-card text-foreground transition-all duration-200 outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary ${
+                className={`w-full pl-10 pr-4 py-3 min-h-[44px] rounded-lg border bg-card text-foreground transition-colors duration-200 outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary ${
                   errors.username ? 'border-destructive/50 focus:border-destructive focus:ring-destructive' : 'border-border'
                 }`}
                 disabled={isLoading}
@@ -122,20 +131,18 @@ export default function LoginPage() {
 
           {/* Password Input */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Password
-              </label>
-            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-muted-foreground">
+              Password
+            </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-muted-foreground">
                 <Lock size={18} />
               </span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter password (e.g. admin123)"
+                placeholder="Enter your password"
                 {...register('password')}
-                className={`w-full pl-10 pr-10 py-3 rounded-lg border bg-card text-foreground transition-all duration-200 outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary ${
+                className={`w-full pl-10 pr-10 py-3 min-h-[44px] rounded-lg border bg-card text-foreground transition-colors duration-200 outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary ${
                   errors.password ? 'border-destructive/50 focus:border-destructive focus:ring-destructive' : 'border-border'
                 }`}
                 disabled={isLoading}
@@ -143,7 +150,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer min-w-[44px] justify-center"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -157,7 +164,7 @@ export default function LoginPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center py-3 px-4 rounded-lg bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-sm transition-all duration-200 shadow-md shadow-primary/10 hover:shadow-primary/20 transform hover:-translate-y-[1px] active:translate-y-[1px] disabled:opacity-75 disabled:pointer-events-none cursor-pointer"
+            className="w-full flex items-center justify-center py-3 min-h-[44px] px-4 rounded-lg bg-primary hover:bg-accent text-primary-foreground font-semibold text-sm transition-colors duration-200 shadow-sm disabled:opacity-75 disabled:pointer-events-none cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -171,12 +178,11 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-border/40 text-center text-xs text-muted-foreground">
-          <p>Demo accounts:</p>
-          <div className="flex justify-center gap-4 mt-2">
-            <span>Admin: <strong className="text-foreground">admin / admin123</strong></span>
-            <span>Staff: <strong className="text-foreground">staff / staff123</strong></span>
-          </div>
+        {/* Removed demo credentials block per QA report */}
+        <div className="mt-6 pt-4 border-t border-border text-center">
+          <p className="text-xs text-muted-foreground">
+            Seisuvai Catering — Business Management System
+          </p>
         </div>
       </div>
     </div>

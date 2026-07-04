@@ -1,50 +1,108 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   SEISUVAI BRAND DESIGN TOKENS
+   Derived from the invoice/quotation PDF brand identity:
+   Gold + Black + Warm Ivory
+   ============================================================ */
+
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6366f1;
-  --radius: 0.75rem;
+  /* Core palette — warm, premium, structured-ledger feel */
+  --background:         #FAF8F3;   /* warm ivory, not clinical white */
+  --foreground:         #1A1A1A;   /* near-black, matches invoice BLACK */
+  --card:               #FFFFFF;
+  --card-foreground:    #1A1A1A;
+  --popover:            #FFFFFF;
+  --popover-foreground: #1A1A1A;
+
+  /* Primary = Gold Dark — used for primary actions, active states */
+  --primary:            #A88B3D;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary = Warm off-white from invoice TABLE_ALT */
+  --secondary:          #F9F6EE;
+  --secondary-foreground: #333333;
+
+  /* Muted = Slightly warmer than secondary */
+  --muted:              #F3EFE4;
+  --muted-foreground:   #666666;
+
+  /* Accent = GOLD — used sparingly: highlights, active nav, hover */
+  --accent:             #C9A54E;
+  --accent-foreground:  #1A1A1A;
+
+  /* Destructive = Muted brick red, not stock Tailwind red */
+  --destructive:        #B3413A;
+  --destructive-foreground: #FFFFFF;
+
+  /* Borders — warm, not cool slate */
+  --border:             #E5DFCF;
+  --input:              #E5DFCF;
+  --ring:               #C9A54E;
+
+  /* Radius — slightly less rounded for structured-ledger feel */
+  --radius:             0.5rem;
+
+  /* ---- Semantic status colors ---- */
+  --success:            #2D7A4F;
+  --success-foreground: #FFFFFF;
+  --warning:            #B8860B;
+  --warning-foreground: #FFFFFF;
+  --info:               #4A7BA7;
+  --info-foreground:    #FFFFFF;
+
+  /* ---- Type scale (consistent across all pages) ---- */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.8125rem;  /* 13px */
+  --text-base: 0.875rem;   /* 14px */
+  --text-lg:   1rem;       /* 16px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.5rem;     /* 24px */
+  --text-3xl:  1.875rem;   /* 30px */
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
 }
 
+/* Dark mode — secondary, based on real brand BLACK #1A1A1A */
 .dark {
-  --background: #090d16;
-  --foreground: #f1f5f9;
-  --card: #111827;
-  --card-foreground: #f1f5f9;
-  --popover: #111827;
-  --popover-foreground: #f1f5f9;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #1f2937;
-  --secondary-foreground: #f1f5f9;
-  --muted: #111827;
-  --muted-foreground: #9ca3af;
-  --accent: #1f2937;
-  --accent-foreground: #f1f5f9;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #818cf8;
+  --background:         #1A1A1A;
+  --foreground:         #F5F0E6;
+  --card:               #242424;
+  --card-foreground:    #F5F0E6;
+  --popover:            #242424;
+  --popover-foreground: #F5F0E6;
+
+  --primary:            #C9A54E;
+  --primary-foreground: #1A1A1A;
+
+  --secondary:          #2A2A2A;
+  --secondary-foreground: #E5DFCF;
+
+  --muted:              #333333;
+  --muted-foreground:   #999999;
+
+  --accent:             #C9A54E;
+  --accent-foreground:  #1A1A1A;
+
+  --destructive:        #C75B54;
+  --destructive-foreground: #FFFFFF;
+
+  --border:             #3D3D3D;
+  --input:              #3D3D3D;
+  --ring:               #C9A54E;
+
+  --success:            #3D9B6B;
+  --warning:            #D4A017;
+  --info:               #5A9BC7;
 }
 
+/* ============================================================
+   TAILWIND v4 THEME BINDINGS
+   ============================================================ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -65,26 +123,100 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
-  --font-display: var(--font-outfit), ui-sans-serif, system-ui;
+
+  /* Status colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  /* Typography */
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-libre-caslon), Georgia, 'Times New Roman', serif;
 }
 
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui;
+  font-family: var(--font-public-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom premium styling utilities */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* Consistent heading styles using the display serif font */
+.heading-display {
+  font-family: var(--font-libre-caslon), Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
 }
 
-.dark .glass-panel {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(30, 41, 59, 0.8);
+/* Gold decorative rule (used sparingly) */
+.gold-rule {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--accent) 20%,
+    var(--accent) 80%,
+    transparent
+  );
+}
+
+/* Card base style — warm, subtle shadow instead of glassmorphism */
+.card-base {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+/* Mobile touch target minimum */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Sticky mobile action bar */
+.sticky-action-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background-color: var(--card);
+  border-top: 1px solid var(--border);
+  z-index: 20;
+}
+
+@media (min-width: 768px) {
+  .sticky-action-bar {
+    position: static;
+    padding: 0;
+    background: transparent;
+    border-top: none;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

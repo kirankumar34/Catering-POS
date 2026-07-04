@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Response } from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import PDFDocument = require('pdfkit');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -14,7 +16,6 @@ const COMPANY = {
   phone: '+91 98765 43210',
   website: 'seisuvai catering.netlify.app',
   address: '123, Gandhi Road, Chennai - 600001, Tamil Nadu, India',
-  gstin: '33ABCDE1234F1Z5',
   bank: {
     accountName: 'Seisuvai Catering Services',
     accountNumber: '9876543210',
@@ -43,7 +44,7 @@ const BORDER_GOLD = '#D4A843';
 
 @Injectable()
 export class BillsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   // ─── PDF Generation (shared logic for Invoice & Quotation) ──────────────
   private async generatePdf(
@@ -56,12 +57,24 @@ export class BillsService {
       include: {
         customer: { include: { addresses: { where: { isDefault: true }, take: 1 } } },
         menu: { include: { items: true } },
-        items: { include: { item: { select: { name: true, category: true, isVeg: true } } } },
+        items: { include: { item: { select: { name: true, category: true, isVeg: true, description: true } } } },
         bills: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
     });
 
     if (!order) throw new NotFoundException('Order not found');
+
+    // Fetch settings dynamically
+    const settings = await this.prisma.setting.findMany();
+    const settingsMap = new Map(settings.map((s) => [s.key, s.value]));
+    const getSetting = (key: string, defaultValue: string) => settingsMap.get(key) || defaultValue;
+
+    const bizName = getSetting('businessName', COMPANY.name);
+    const bizAddress = getSetting('address', COMPANY.address);
+    const bizPhone = getSetting('phone', COMPANY.phone);
+    const bizGstin = settingsMap.get('gstin');
+    const bizProprietor = getSetting('proprietorName', COMPANY.proprietor);
+    const bizUpiId = getSetting('upiId', COMPANY.bank.upiId);
 
     // ─── Invoice/Quotation Number ───────────────────────────────────────
     let docNumber: string;
@@ -89,7 +102,7 @@ export class BillsService {
     }
 
     // ─── Generate UPI QR Code as data URL buffer ────────────────────────
-    const upiLink = `upi://pay?pa=${COMPANY.bank.upiId}&pn=${encodeURIComponent(COMPANY.bank.accountName)}&am=${order.pendingAmount > 0 ? order.pendingAmount : order.grandTotal}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
+    const upiLink = `upi://pay?pa=${bizUpiId}&pn=${encodeURIComponent(getSetting('bankAccountName', bizName))}&am=${order.pendingAmount > 0 ? order.pendingAmount : order.grandTotal}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
     let qrBuffer: Buffer | null = null;
     try {
       const qrDataUrl: string = await QRCode.toDataURL(upiLink, { width: 120, margin: 1 });
@@ -100,7 +113,7 @@ export class BillsService {
     }
 
     // ─── Prepare PDF ────────────────────────────────────────────────────
-    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+    const doc = new PDFDocument({ size: 'A4', margins: { top: 40, bottom: 0, left: 40, right: 40 } });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${docNumber}.pdf"`);
     doc.pipe(res);
@@ -138,42 +151,77 @@ export class BillsService {
     doc.rect(M - 5, M - 5, W + 10, PH - M * 2 + 10).strokeColor(GOLD).lineWidth(1.5).stroke();
     doc.rect(M - 2, M - 2, W + 4, PH - M * 2 + 4).strokeColor(GOLD).lineWidth(0.3).stroke();
 
-    // ─── Header: Logo circle + Company Name ─────────────────────────────
-    let y = M + 15;
+    const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
 
-    // Gold circle for "logo"
-    const logoX = PW / 2;
-    const logoR = 30;
-    doc.circle(logoX, y + logoR, logoR + 3).fillAndStroke(GOLD, GOLD_DARK);
-    doc.circle(logoX, y + logoR, logoR).fillAndStroke(WHITE, GOLD);
-    doc.fontSize(9).fillColor(GOLD_DARK).font('Helvetica-Bold')
-      .text('SEISUVAI', logoX - 22, y + logoR - 12, { width: 44, align: 'center' });
-    doc.fontSize(7).fillColor(GOLD_DARK).font('Helvetica')
-      .text('Catering', logoX - 22, y + logoR, { width: 44, align: 'center' });
+    // ─── Watermark ──────────────────────────────────────────────────────
+    doc.save();
+    doc.opacity(0.06); // Faint background watermark
+    const watermarkW = 280;
+    const watermarkH = 280;
+    const watermarkX = (PW - watermarkW) / 2;
+    const watermarkY = (PH - watermarkH) / 2;
+    try {
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, watermarkX, watermarkY, { width: watermarkW, height: watermarkH });
+      }
+    } catch (err) {
+      console.error('Failed to draw watermark:', err);
+    }
+    doc.restore();
 
-    y += logoR * 2 + 18;
+    // ─── Header: Logo Image & Company Identity ──────────────────────────
+    let y = M + 10;
+    const logoW = 55;
+    const logoH = 55;
+    const logoX = (PW - logoW) / 2;
+
+    let hasLogo = false;
+    try {
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, logoX, y, { width: logoW, height: logoH });
+        hasLogo = true;
+      }
+    } catch (err) {
+      console.error('Failed to load logo image:', err);
+    }
+
+    if (!hasLogo) {
+      // Fallback circular seal: black and gold circular seal
+      const circleX = PW / 2;
+      const circleR = 35;
+      const centerY = y + logoH / 2;
+      doc.circle(circleX, centerY, circleR + 3).fillAndStroke(BLACK, GOLD);
+      doc.circle(circleX, centerY, circleR).fillAndStroke(BLACK, GOLD_DARK);
+      doc.fontSize(16).fillColor(GOLD).font('Helvetica-Bold')
+        .text('S', circleX - 22, centerY - 10, { width: 44, align: 'center' });
+    }
+
+    y += logoH + 8;
 
     // Company name
-    doc.fontSize(28).fillColor(BLACK).font('Helvetica-Bold')
-      .text(COMPANY.name, M, y, { width: W, align: 'center' });
-    y += 34;
+    doc.fontSize(20).fillColor(BLACK).font('Helvetica-Bold')
+      .text(bizName, M, y, { width: W, align: 'center' });
+    y += 24;
 
     // Tagline with decorative dashes
-    doc.fontSize(10).fillColor(GOLD_DARK).font('Helvetica')
-      .text(`✦  ${COMPANY.tagline}  ✦`, M, y, { width: W, align: 'center' });
-    y += 18;
+    doc.fontSize(8.5).fillColor(GOLD_DARK).font('Helvetica')
+      .text(`✦  ${getSetting('tagline', COMPANY.tagline)}  ✦`, M, y, { width: W, align: 'center' });
+    y += 13;
 
     // Contact info
-    doc.fontSize(8).fillColor(DARK_GRAY).font('Helvetica')
-      .text(`${COMPANY.proprietor}  |  ${COMPANY.phone}  |  ${COMPANY.website}`, M, y, { width: W, align: 'center' });
-    y += 12;
-    doc.text(COMPANY.address, M, y, { width: W, align: 'center' });
-    y += 12;
-    doc.font('Helvetica-Bold').text(`GSTIN: ${COMPANY.gstin}`, M, y, { width: W, align: 'center' });
-    y += 20;
+    doc.fontSize(7.5).fillColor(DARK_GRAY).font('Helvetica')
+      .text(`Prop: ${bizProprietor}  |  ${bizPhone}  |  ${getSetting('website', COMPANY.website)}`, M, y, { width: W, align: 'center' });
+    y += 10;
+    doc.text(bizAddress, M, y, { width: W, align: 'center' });
+    y += 10;
+    if (bizGstin && bizGstin.trim()) {
+      doc.font('Helvetica-Bold').text(`GSTIN: ${bizGstin.trim()}`, M, y, { width: W, align: 'center' });
+      y += 10;
+    }
+    y += 4;
 
     drawLine(y);
-    y += 12;
+    y += 8;
 
     // ─── Billed To & Invoice/Quotation Details ──────────────────────────
     const colW = W / 2 - 10;
@@ -181,7 +229,7 @@ export class BillsService {
     // Left: Billed To
     doc.fontSize(10).fillColor(BLACK).font('Helvetica-Bold')
       .text(`BILLED TO`, M + 5, y);
-    y += 16;
+    y += 12;
 
     const customerAddr = order.customer.addresses[0]?.address || '';
     const billedFields = [
@@ -197,16 +245,22 @@ export class BillsService {
       doc.fontSize(8).fillColor(DARK_GRAY).font('Helvetica')
         .text(label, M + 5, bY, { width: 85 });
       doc.text(':', M + 90, bY);
-      doc.fillColor(BLACK).font('Helvetica-Bold')
-        .text(value || '—', M + 100, bY, { width: colW - 100 });
-      drawDottedLine(M + 100, bY + 10, M + colW);
-      bY += 16;
+      
+      const valStr = value || '—';
+      doc.fillColor(BLACK).font('Helvetica-Bold');
+      const valHeight = doc.heightOfString(valStr, { width: colW - 100 });
+      doc.text(valStr, M + 100, bY, { width: colW - 100 });
+      
+      const dottedLineY = bY + valHeight + 1;
+      drawDottedLine(M + 100, dottedLineY, M + colW);
+      
+      bY += Math.max(13.5, valHeight + 4);
     }
 
     // Right: Invoice/Quotation Details
     const rightX = M + colW + 20;
     doc.fontSize(10).fillColor(BLACK).font('Helvetica-Bold')
-      .text(`${docType} DETAILS`, rightX + 5, y - 16);
+      .text(`${docType} DETAILS`, rightX + 5, y - 12);
 
     const detailFields = [
       [`${docType === 'INVOICE' ? 'Invoice' : 'Quotation'} No.`, docNumber],
@@ -222,66 +276,91 @@ export class BillsService {
       doc.fontSize(8).fillColor(DARK_GRAY).font('Helvetica')
         .text(label, rightX + 5, dY, { width: 75 });
       doc.text(':', rightX + 80, dY);
-      doc.fillColor(BLACK).font('Helvetica-Bold')
-        .text(value, rightX + 90, dY, { width: colW - 90 });
-      drawDottedLine(rightX + 90, dY + 10, rightX + colW);
-      dY += 16;
+      
+      const valStr = value || '—';
+      doc.fillColor(BLACK).font('Helvetica-Bold');
+      const valHeight = doc.heightOfString(valStr, { width: colW - 90 });
+      doc.text(valStr, rightX + 90, dY, { width: colW - 90 });
+      
+      const dottedLineY = dY + valHeight + 1;
+      drawDottedLine(rightX + 90, dottedLineY, rightX + colW);
+      
+      dY += Math.max(13.5, valHeight + 4);
     }
 
-    y = Math.max(bY, dY) + 12;
+    y = Math.max(bY, dY) + 8;
     drawLine(y);
-    y += 8;
+    y += 4;
 
     // ─── Items Table ────────────────────────────────────────────────────
     const tableX = M + 5;
     const tableW = W - 10;
     const cols = [
-      { label: 'DESCRIPTION', x: tableX, w: tableW * 0.40 },
-      { label: 'QTY / PAX', x: tableX + tableW * 0.40, w: tableW * 0.18 },
-      { label: 'RATE PER PERSON', x: tableX + tableW * 0.58, w: tableW * 0.22 },
-      { label: 'AMOUNT (₹)', x: tableX + tableW * 0.80, w: tableW * 0.20 },
+      { label: 'DESCRIPTION', x: tableX, w: tableW * 0.40, align: 'left' as const },
+      { label: 'QTY / PAX', x: tableX + tableW * 0.40, w: tableW * 0.15, align: 'center' as const },
+      { label: 'RATE PER PERSON', x: tableX + tableW * 0.55, w: tableW * 0.20, align: 'right' as const },
+      { label: 'AMOUNT (Rs.)', x: tableX + tableW * 0.75, w: tableW * 0.25, align: 'right' as const },
     ];
 
     // Table header
-    const headerH = 20;
+    const headerH = 16;
     doc.rect(tableX, y, tableW, headerH).fill(TABLE_HEADER_BG);
     for (const col of cols) {
-      doc.fontSize(7).fillColor(GOLD).font('Helvetica-Bold')
-        .text(col.label, col.x + 4, y + 6, { width: col.w - 8, align: col === cols[0] ? 'left' : 'center' });
+      doc.fontSize(6.5).fillColor(GOLD).font('Helvetica-Bold')
+        .text(col.label, col.x + 4, y + 5, { width: col.w - 8, align: col.align });
     }
     y += headerH;
 
     // Build items list — from order items or package items or simple summary
     interface DisplayItem {
       name: string;
+      description?: string;
       qty: number;
       rate: number;
       amount: number;
     }
     const displayItems: DisplayItem[] = [];
 
+    // Add standard package menu item as a single line item
+    if (order.menu) {
+      const menuDesc = order.menu.description?.trim();
+      const dishNames = order.menu.items.map(mi => mi.name).join(', ');
+
+      let combinedDesc = '';
+      if (menuDesc) {
+        combinedDesc += menuDesc;
+      }
+      if (dishNames) {
+        if (combinedDesc) {
+          combinedDesc += '\n';
+        }
+        combinedDesc += `• ${dishNames}`;
+      }
+
+      displayItems.push({
+        name: `Menu: ${order.menu.name}`,
+        description: combinedDesc || undefined,
+        qty: order.numberOfPlates,
+        rate: order.pricePerPlate,
+        amount: order.numberOfPlates * order.pricePerPlate,
+      });
+    }
+
+    // Add custom items
     if (order.items.length > 0) {
-      // Custom/order items
       for (const oi of order.items) {
         displayItems.push({
           name: oi.item.name,
+          description: oi.item.description || undefined,
           qty: oi.quantity,
           rate: oi.rate,
           amount: oi.quantity * oi.rate,
         });
       }
-    } else if (order.menu && order.menu.items.length > 0) {
-      // Package menu items — show each dish in the package
-      for (const mi of order.menu.items) {
-        displayItems.push({
-          name: mi.name,
-          qty: order.numberOfPlates,
-          rate: mi.price,
-          amount: order.numberOfPlates * mi.price,
-        });
-      }
-    } else {
-      // Simple summary row
+    }
+
+    // Fallback if both are empty
+    if (displayItems.length === 0) {
       displayItems.push({
         name: order.menu?.name || 'Catering Services',
         qty: order.numberOfPlates,
@@ -291,32 +370,54 @@ export class BillsService {
     }
 
     // Table rows
-    const rowH = 18;
+    const tableRowsStartY = y;
     for (let i = 0; i < displayItems.length; i++) {
       const item = displayItems[i];
+
+      // Calculate heights
+      doc.font('Helvetica').fontSize(8);
+      const nameHeight = doc.heightOfString(item.name, { width: cols[0].w - 8 });
+      doc.fontSize(7);
+      const descHeight = item.description ? doc.heightOfString(item.description, { width: cols[0].w - 8 }) : 0;
+
+      const padding = 10;
+      const textHeight = nameHeight + (descHeight > 0 ? descHeight + 2 : 0);
+      const rowH = Math.max(20, textHeight + padding);
+
       const bg = i % 2 === 0 ? WHITE : TABLE_ALT_BG;
       doc.rect(tableX, y, tableW, rowH).fill(bg);
 
+      // Draw Description Column (Name + Description)
       doc.fontSize(8).fillColor(BLACK).font('Helvetica')
-        .text(item.name, cols[0].x + 4, y + 5, { width: cols[0].w - 8 });
-      doc.text(String(item.qty), cols[1].x + 4, y + 5, { width: cols[1].w - 8, align: 'center' });
-      doc.text(`₹${item.rate.toLocaleString('en-IN')}`, cols[2].x + 4, y + 5, { width: cols[2].w - 8, align: 'center' });
+        .text(item.name, cols[0].x + 4, y + 5, { width: cols[0].w - 8, align: cols[0].align });
+      if (item.description) {
+        doc.fontSize(7).fillColor(LIGHT_GRAY).font('Helvetica-Oblique')
+          .text(item.description, cols[0].x + 4, y + 5 + nameHeight + 2, { width: cols[0].w - 8, align: cols[0].align });
+      }
+
+
+      // Vertically center content for other columns
+      const otherY = y + (rowH - 8) / 2; // 8 is approximate height of text
+      doc.fontSize(8).fillColor(BLACK).font('Helvetica')
+        .text(String(item.qty), cols[1].x + 4, otherY, { width: cols[1].w - 8, align: cols[1].align });
+      doc.text(`Rs. ${item.rate.toLocaleString('en-IN')}`, cols[2].x + 4, otherY, { width: cols[2].w - 8, align: cols[2].align });
       doc.font('Helvetica-Bold')
-        .text(`₹${item.amount.toLocaleString('en-IN')}`, cols[3].x + 4, y + 5, { width: cols[3].w - 8, align: 'right' });
+        .text(`Rs. ${item.amount.toLocaleString('en-IN')}`, cols[3].x + 4, otherY, { width: cols[3].w - 8, align: cols[3].align });
 
       y += rowH;
     }
 
     // Table border
-    doc.rect(tableX, y - (displayItems.length * rowH) - headerH, tableW, (displayItems.length * rowH) + headerH)
+    const tableTotalHeight = y - (tableRowsStartY - headerH);
+    doc.rect(tableX, tableRowsStartY - headerH, tableW, tableTotalHeight)
       .strokeColor(GOLD).lineWidth(0.5).stroke();
 
-    y += 10;
+    y += 6;
 
     // ─── Totals Box (right-aligned) ─────────────────────────────────────
     const totalsX = tableX + tableW * 0.55;
     const totalsW = tableW * 0.45;
-    const totRowH = 16;
+    const totRowH = 13;
 
     const deliveryCharges = order.deliveryCharges || 0;
     const discountAmt = (order.subtotal * order.discount) / 100;
@@ -325,17 +426,17 @@ export class BillsService {
 
     // Totals rows
     const totalsRows: { label: string; value: string; bold?: boolean; gold?: boolean }[] = [
-      { label: 'SUBTOTAL', value: `₹${order.subtotal.toLocaleString('en-IN')}` },
-      { label: 'DELIVERY CHARGES', value: deliveryCharges > 0 ? `₹${deliveryCharges.toLocaleString('en-IN')}` : '₹0' },
-      { label: 'ADDITIONAL CHARGES', value: order.additionalCost > 0 ? `₹${order.additionalCost.toLocaleString('en-IN')}` : '₹0' },
+      { label: 'SUBTOTAL', value: `Rs. ${order.subtotal.toLocaleString('en-IN')}` },
+      { label: 'DELIVERY CHARGES', value: deliveryCharges > 0 ? `Rs. ${deliveryCharges.toLocaleString('en-IN')}` : 'Rs. 0' },
+      { label: 'ADDITIONAL CHARGES', value: order.additionalCost > 0 ? `Rs. ${order.additionalCost.toLocaleString('en-IN')}` : 'Rs. 0' },
     ];
     if (order.gst > 0) {
-      totalsRows.push({ label: `GST (${order.gst}%)`, value: `₹${gstAmt.toLocaleString('en-IN')}` });
+      totalsRows.push({ label: `GST (${order.gst}%)`, value: `Rs. ${gstAmt.toLocaleString('en-IN')}` });
     }
     if (order.discount > 0) {
-      totalsRows.push({ label: 'DISCOUNT', value: `- ₹${discountAmt.toLocaleString('en-IN')}` });
+      totalsRows.push({ label: 'DISCOUNT', value: `- Rs. ${discountAmt.toLocaleString('en-IN')}` });
     }
-    totalsRows.push({ label: 'GRAND TOTAL', value: `₹${order.grandTotal.toLocaleString('en-IN')}`, bold: true, gold: true });
+    totalsRows.push({ label: 'GRAND TOTAL', value: `Rs. ${order.grandTotal.toLocaleString('en-IN')}`, bold: true, gold: true });
 
     // Draw border around totals
     const totalsHeight = totalsRows.length * totRowH;
@@ -347,24 +448,24 @@ export class BillsService {
 
       if (row.gold) {
         doc.rect(totalsX, ry, totalsW, totRowH).fill(GOLD);
-        doc.fontSize(9).fillColor(WHITE).font('Helvetica-Bold')
-          .text(row.label, totalsX + 6, ry + 4, { width: totalsW * 0.55 })
-          .text(row.value, totalsX + totalsW * 0.55, ry + 4, { width: totalsW * 0.40, align: 'right' });
+        doc.fontSize(8).fillColor(WHITE).font('Helvetica-Bold')
+          .text(row.label, totalsX + 6, ry + 3, { width: totalsW * 0.55 })
+          .text(row.value, totalsX + totalsW * 0.55, ry + 3, { width: totalsW * 0.45 - 6, align: 'right' });
       } else {
         if (i > 0) {
           doc.moveTo(totalsX, ry).lineTo(totalsX + totalsW, ry).strokeColor(GOLD).lineWidth(0.3).stroke();
         }
         const font = row.bold ? 'Helvetica-Bold' : 'Helvetica';
-        doc.fontSize(8).fillColor(BLACK).font(font)
-          .text(row.label, totalsX + 6, ry + 4, { width: totalsW * 0.55 });
+        doc.fontSize(7.5).fillColor(BLACK).font(font)
+          .text(row.label, totalsX + 6, ry + 3, { width: totalsW * 0.55 });
         doc.font('Helvetica-Bold')
-          .text(row.value, totalsX + totalsW * 0.55, ry + 4, { width: totalsW * 0.40, align: 'right' });
+          .text(row.value, totalsX + totalsW * 0.55, ry + 3, { width: totalsW * 0.45 - 6, align: 'right' });
       }
     }
 
-    y += totalsHeight + 20;
+    y += totalsHeight + 10;
     drawLine(y);
-    y += 10;
+    y += 6;
 
     // ─── Bank Details + QR Code ─────────────────────────────────────────
     const bankX = M + 5;
@@ -377,11 +478,11 @@ export class BillsService {
     y += 14;
 
     const bankFields = [
-      ['Account Name', COMPANY.bank.accountName],
-      ['Account Number', COMPANY.bank.accountNumber],
-      ['IFSC Code', COMPANY.bank.ifscCode],
-      ['Branch', COMPANY.bank.branch],
-      ['UPI ID', COMPANY.bank.upiId],
+      ['Account Name', getSetting('bankAccountName', COMPANY.bank.accountName)],
+      ['Account Number', getSetting('bankAccountNumber', COMPANY.bank.accountNumber)],
+      ['IFSC Code', getSetting('bankIfscCode', COMPANY.bank.ifscCode)],
+      ['Branch', getSetting('bankBranch', COMPANY.bank.branch)],
+      ['UPI ID', bizUpiId],
     ];
 
     const bankStartY = y;
@@ -398,7 +499,7 @@ export class BillsService {
 
     if (qrBuffer) {
       try {
-        doc.image(qrBuffer, qrX + 10, bankStartY, { width: 75, height: 75 });
+        doc.image(qrBuffer, qrX + 22.5, bankStartY, { width: 75, height: 75 });
       } catch {
         // QR render failed
         doc.fontSize(8).fillColor(LIGHT_GRAY).font('Helvetica')
@@ -406,7 +507,7 @@ export class BillsService {
       }
     }
 
-    y += 15;
+    y = bankStartY + 85;
     drawLine(y);
     y += 20;
 
@@ -416,26 +517,28 @@ export class BillsService {
     y += 22;
     doc.fontSize(8).fillColor(DARK_GRAY).font('Helvetica-Bold')
       .text('FOR CHOOSING SEISUVAI CATERING', M, y, { width: W, align: 'center' });
-    y += 18;
+    y += 25;
 
     // ─── Terms & Authorized Signature ───────────────────────────────────
     const termsX = M + 5;
     const sigX = M + W * 0.6;
+    const bottomStartY = y;
 
+    // Left Column: Terms & Conditions
     doc.fontSize(8).fillColor(BLACK).font('Helvetica-Bold')
-      .text('TERMS & CONDITIONS', termsX, y);
-    y += 12;
+      .text('TERMS & CONDITIONS', termsX, bottomStartY);
 
+    let termY = bottomStartY + 14;
     for (const term of COMPANY.terms) {
       doc.fontSize(6.5).fillColor(DARK_GRAY).font('Helvetica')
-        .text(`• ${term}`, termsX, y, { width: W * 0.55 });
-      y += 10;
+        .text(`• ${term}`, termsX, termY, { width: W * 0.55 });
+      termY += 10;
     }
 
-    // Signature area
+    // Right Column: Signature (aligned on a stable grid with headers)
     doc.fontSize(8).fillColor(GOLD_DARK).font('Helvetica-Bold')
-      .text('AUTHORIZED SIGNATURE', sigX, y - 30, { width: W * 0.35, align: 'center' });
-    drawDottedLine(sigX + 10, y - 15, sigX + W * 0.33);
+      .text('AUTHORIZED SIGNATURE', sigX, bottomStartY, { width: W * 0.35, align: 'center' });
+    drawDottedLine(sigX + 10, bottomStartY + 45, sigX + W * 0.33);
 
     doc.end();
   }

@@ -9,6 +9,8 @@ const DEFAULT_SETTINGS = [
   { key: 'proprietorName', value: 'S. Vignesh' },
   { key: 'phone', value: '+91 98765 43210' },
   { key: 'gstin', value: '33ABCDE1234F1Z5' },
+  { key: 'address', value: '123, Gandhi Road, Chennai - 600001, Tamil Nadu, India' },
+  { key: 'upiId', value: 'kiransmart00-2@okicici' },
 ];
 
 @Injectable()

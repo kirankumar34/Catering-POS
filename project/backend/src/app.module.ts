@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -16,9 +17,12 @@ import { InventoryModule } from './inventory/inventory.module';
 import { UsersModule } from './users/users.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
 import { SettingsModule } from './settings/settings.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ChecklistModule } from './checklist/checklist.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     CustomersModule,
@@ -34,6 +38,8 @@ import { SettingsModule } from './settings/settings.module';
     UsersModule,
     ActivityLogModule,
     SettingsModule,
+    NotificationsModule,
+    ChecklistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

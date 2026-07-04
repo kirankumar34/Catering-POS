@@ -105,6 +105,12 @@ model Order {
   payments       Payment[]
   expenses       Expense[]
   profitAnalysis ProfitAnalysis?
+  notifications  Notification[]
+  checklistItems OrderChecklistItem[]
+
+  @@index([eventDate])
+  @@index([customerId, eventDate])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -129,6 +135,8 @@ model Bill {
   pdfUrl        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([createdAt])
 }
 
 model Payment {
@@ -191,4 +199,38 @@ model Setting {
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  orderId   String
+  type      String   // "EVENT_REMINDER_1D" | "EVENT_REMINDER_2D"
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model ChecklistTemplate {
+  id    String                  @id @default(uuid())
+  name  String                  // e.g. "Standard Event Prep"
+  items ChecklistTemplateItem[]
+}
+
+model ChecklistTemplateItem {
+  id         String            @id @default(uuid())
+  templateId String
+  label      String
+  orderIndex Int
+  template   ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model OrderChecklistItem {
+  id        String    @id @default(uuid())
+  orderId   String
+  label     String
+  checked   Boolean   @default(false)
+  checkedAt DateTime?
+  orderIndex Int      @default(0)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
