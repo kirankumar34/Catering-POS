@@ -8,7 +8,7 @@ async function bootstrap() {
         throw new Error('JWT_SECRET environment variable is required and not set.');
     }
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+    const corsOrigin = process.env.CORS_ORIGIN || 'https://catering-pos-brown.vercel.app';
     app.enableCors({
         origin: corsOrigin,
         credentials: true,
