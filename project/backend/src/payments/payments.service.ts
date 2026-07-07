@@ -7,7 +7,9 @@ export class PaymentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreatePaymentDto) {
-    const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: dto.orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
     const payment = await this.prisma.payment.create({
@@ -19,11 +21,15 @@ export class PaymentsService {
         transactionId: dto.transactionId ?? null,
         notes: dto.notes ?? null,
       },
-      include: { order: { select: { id: true, orderNumber: true, grandTotal: true } } },
+      include: {
+        order: { select: { id: true, orderNumber: true, grandTotal: true } },
+      },
     });
 
     // Recalculate pendingAmount on the order
-    const allPayments = await this.prisma.payment.findMany({ where: { orderId: dto.orderId } });
+    const allPayments = await this.prisma.payment.findMany({
+      where: { orderId: dto.orderId },
+    });
     const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     await this.prisma.order.update({
       where: { id: dto.orderId },
@@ -36,7 +42,12 @@ export class PaymentsService {
     return payment;
   }
 
-  async findAll(query: { page?: number; limit?: number; orderId?: string; method?: string }) {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    orderId?: string;
+    method?: string;
+  }) {
     const page = query.page || 1;
     const limit = query.limit || 12;
     const skip = (page - 1) * limit;
@@ -48,15 +59,26 @@ export class PaymentsService {
     const [total, data] = await this.prisma.$transaction([
       this.prisma.payment.count({ where }),
       this.prisma.payment.findMany({
-        where, skip, take: limit,
+        where,
+        skip,
+        take: limit,
         orderBy: { paymentDate: 'desc' },
         include: {
-          order: { select: { id: true, orderNumber: true, customer: { select: { name: true } } } },
+          order: {
+            select: {
+              id: true,
+              orderNumber: true,
+              customer: { select: { name: true } },
+            },
+          },
         },
       }),
     ]);
 
-    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   async findOne(id: string) {
@@ -73,13 +95,20 @@ export class PaymentsService {
     await this.prisma.payment.delete({ where: { id } });
 
     // Recalculate order pending amount after removal
-    const order = await this.prisma.order.findUnique({ where: { id: payment.orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: payment.orderId },
+    });
     if (order) {
-      const remaining = await this.prisma.payment.findMany({ where: { orderId: payment.orderId } });
+      const remaining = await this.prisma.payment.findMany({
+        where: { orderId: payment.orderId },
+      });
       const totalPaid = remaining.reduce((sum, p) => sum + Number(p.amount), 0);
       await this.prisma.order.update({
         where: { id: payment.orderId },
-        data: { advancePaid: totalPaid, pendingAmount: Math.max(Number(order.grandTotal) - totalPaid, 0) },
+        data: {
+          advancePaid: totalPaid,
+          pendingAmount: Math.max(Number(order.grandTotal) - totalPaid, 0),
+        },
       });
     }
     return { message: 'Payment deleted successfully' };

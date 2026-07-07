@@ -6,7 +6,9 @@ export class ChecklistService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getChecklistForOrder(orderId: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
     return this.prisma.orderChecklistItem.findMany({
@@ -16,7 +18,9 @@ export class ChecklistService {
   }
 
   async addChecklistItem(orderId: string, label: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
     const maxItem = await this.prisma.orderChecklistItem.findFirst({
@@ -35,7 +39,9 @@ export class ChecklistService {
   }
 
   async updateChecklistItem(id: string, checked: boolean) {
-    const item = await this.prisma.orderChecklistItem.findUnique({ where: { id } });
+    const item = await this.prisma.orderChecklistItem.findUnique({
+      where: { id },
+    });
     if (!item) throw new NotFoundException('Checklist item not found');
 
     return this.prisma.orderChecklistItem.update({
@@ -48,7 +54,9 @@ export class ChecklistService {
   }
 
   async deleteChecklistItem(id: string) {
-    const item = await this.prisma.orderChecklistItem.findUnique({ where: { id } });
+    const item = await this.prisma.orderChecklistItem.findUnique({
+      where: { id },
+    });
     if (!item) throw new NotFoundException('Checklist item not found');
 
     await this.prisma.orderChecklistItem.delete({ where: { id } });
@@ -56,7 +64,9 @@ export class ChecklistService {
   }
 
   async loadFromTemplate(orderId: string, templateId: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
     const template = await this.prisma.checklistTemplate.findUnique({
@@ -69,7 +79,9 @@ export class ChecklistService {
     const currentItems = await this.prisma.orderChecklistItem.findMany({
       where: { orderId },
     });
-    const currentLabels = new Set(currentItems.map((i) => i.label.toLowerCase()));
+    const currentLabels = new Set(
+      currentItems.map((i) => i.label.toLowerCase()),
+    );
 
     // Get max index
     const maxItem = await this.prisma.orderChecklistItem.findFirst({
@@ -78,7 +90,12 @@ export class ChecklistService {
     });
     let nextIndex = maxItem ? maxItem.orderIndex + 1 : 0;
 
-    const itemsToCreate: { orderId: string; label: string; orderIndex: number; checked: boolean }[] = [];
+    const itemsToCreate: {
+      orderId: string;
+      label: string;
+      orderIndex: number;
+      checked: boolean;
+    }[] = [];
     for (const tItem of template.items) {
       if (!currentLabels.has(tItem.label.toLowerCase())) {
         itemsToCreate.push({

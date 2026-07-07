@@ -42,7 +42,8 @@ export class OrdersService {
     const discountAmount = (subtotal * discount) / 100;
     const afterDiscount = subtotal - discountAmount;
     const gstAmount = (afterDiscount * gst) / 100;
-    const grandTotal = afterDiscount + gstAmount + additionalCost + deliveryCharges;
+    const grandTotal =
+      afterDiscount + gstAmount + additionalCost + deliveryCharges;
     const pendingAmount = grandTotal - advancePaid;
 
     return {
@@ -111,7 +112,11 @@ export class OrdersService {
       include: {
         customer: { select: { id: true, name: true, phone: true } },
         menu: { select: { id: true, name: true } },
-        items: { include: { item: { select: { id: true, name: true, category: true } } } },
+        items: {
+          include: {
+            item: { select: { id: true, name: true, category: true } },
+          },
+        },
       },
     });
 
@@ -179,12 +184,16 @@ export class OrdersService {
         },
         menu: {
           include: {
-            items: { select: { id: true, name: true, category: true, isVeg: true } },
+            items: {
+              select: { id: true, name: true, category: true, isVeg: true },
+            },
           },
         },
         items: {
           include: {
-            item: { select: { id: true, name: true, category: true, isVeg: true } },
+            item: {
+              select: { id: true, name: true, category: true, isVeg: true },
+            },
           },
         },
         bills: true,
@@ -211,8 +220,12 @@ export class OrdersService {
     const pricePerPlate = Number(dto.pricePerPlate ?? existing.pricePerPlate);
     const discount = Number(dto.discount ?? existing.discount);
     const gst = Number(dto.gst ?? existing.gst);
-    const additionalCost = Number(dto.additionalCost ?? existing.additionalCost);
-    const deliveryCharges = Number(dto.deliveryCharges ?? existing.deliveryCharges);
+    const additionalCost = Number(
+      dto.additionalCost ?? existing.additionalCost,
+    );
+    const deliveryCharges = Number(
+      dto.deliveryCharges ?? existing.deliveryCharges,
+    );
     const advancePaid = Number(dto.advancePaid ?? existing.advancePaid);
 
     const { subtotal, grandTotal, pendingAmount } = this.calculateTotals(
@@ -250,20 +263,25 @@ export class OrdersService {
         pendingAmount,
         ...(dto.notes !== undefined && { notes: dto.notes }),
         ...(dto.status && { status: dto.status }),
-        ...(dto.items && dto.items.length > 0 && {
-          items: {
-            create: dto.items.map((item) => ({
-              itemId: item.itemId,
-              quantity: item.quantity,
-              rate: item.rate,
-            })),
-          },
-        }),
+        ...(dto.items &&
+          dto.items.length > 0 && {
+            items: {
+              create: dto.items.map((item) => ({
+                itemId: item.itemId,
+                quantity: item.quantity,
+                rate: item.rate,
+              })),
+            },
+          }),
       },
       include: {
         customer: { select: { id: true, name: true, phone: true } },
         menu: { select: { id: true, name: true } },
-        items: { include: { item: { select: { id: true, name: true, category: true } } } },
+        items: {
+          include: {
+            item: { select: { id: true, name: true, category: true } },
+          },
+        },
       },
     });
 

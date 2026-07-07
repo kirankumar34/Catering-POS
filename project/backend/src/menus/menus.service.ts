@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -18,7 +22,9 @@ export class MenusService {
     });
 
     if (existing) {
-      throw new BadRequestException(`A menu package named "${name}" already exists.`);
+      throw new BadRequestException(
+        `A menu package named "${name}" already exists.`,
+      );
     }
 
     // 2. Create and connect items
@@ -27,9 +33,12 @@ export class MenusService {
         name,
         description,
         pricePerPlate,
-        items: itemIds && itemIds.length > 0 ? {
-          connect: itemIds.map(id => ({ id })),
-        } : undefined,
+        items:
+          itemIds && itemIds.length > 0
+            ? {
+                connect: itemIds.map((id) => ({ id })),
+              }
+            : undefined,
       },
       include: {
         items: true,
@@ -37,7 +46,12 @@ export class MenusService {
     });
   }
 
-  async findAll(query: { search?: string; status?: string; page?: number; limit?: number }) {
+  async findAll(query: {
+    search?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const search = query.search || '';
     const statusParam = query.status || '';
     const page = Number(query.page) || 1;
@@ -129,7 +143,9 @@ export class MenusService {
       });
 
       if (existing) {
-        throw new BadRequestException(`A menu package named "${name}" already exists.`);
+        throw new BadRequestException(
+          `A menu package named "${name}" already exists.`,
+        );
       }
     }
 
@@ -141,9 +157,12 @@ export class MenusService {
         description,
         pricePerPlate,
         status,
-        items: itemIds !== undefined ? {
-          set: itemIds.map(itemId => ({ id: itemId })),
-        } : undefined,
+        items:
+          itemIds !== undefined
+            ? {
+                set: itemIds.map((itemId) => ({ id: itemId })),
+              }
+            : undefined,
       },
       include: {
         items: true,
@@ -170,7 +189,7 @@ export class MenusService {
     // Block deletion if referenced by existing catering orders
     if (menu._count.orders > 0) {
       throw new BadRequestException(
-        `Cannot delete "${menu.name}" because it is active in order transaction history. Try marking it inactive instead.`
+        `Cannot delete "${menu.name}" because it is active in order transaction history. Try marking it inactive instead.`,
       );
     }
 

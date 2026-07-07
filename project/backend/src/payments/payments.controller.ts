@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Param, Body, Query, ParseIntPipe, DefaultValuePipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+  UseGuards,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -11,7 +22,9 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  create(@Body() dto: CreatePaymentDto) { return this.paymentsService.create(dto); }
+  create(@Body() dto: CreatePaymentDto) {
+    return this.paymentsService.create(dto);
+  }
 
   @Get()
   findAll(
@@ -19,13 +32,19 @@ export class PaymentsController {
     @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
     @Query('orderId') orderId?: string,
     @Query('method') method?: string,
-  ) { return this.paymentsService.findAll({ page, limit, orderId, method }); }
+  ) {
+    return this.paymentsService.findAll({ page, limit, orderId, method });
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.paymentsService.findOne(id); }
+  findOne(@Param('id') id: string) {
+    return this.paymentsService.findOne(id);
+  }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles('OWNER', 'SUPER_ADMIN')
-  remove(@Param('id') id: string) { return this.paymentsService.remove(id); }
+  remove(@Param('id') id: string) {
+    return this.paymentsService.remove(id);
+  }
 }

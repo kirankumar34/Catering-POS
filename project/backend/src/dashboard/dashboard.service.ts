@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import {
+  startOfDay,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  format,
+} from 'date-fns';
 
 @Injectable()
 export class DashboardService {
@@ -99,7 +106,9 @@ export class DashboardService {
         netProfit: true,
       },
     });
-    const monthlyProfit = Number(monthlyProfitAgg._sum.netProfit || (monthlyRevenue - monthlyExpenses));
+    const monthlyProfit = Number(
+      monthlyProfitAgg._sum.netProfit || monthlyRevenue - monthlyExpenses,
+    );
 
     // 8. Upcoming Events (Next 5 events)
     const upcomingEvents = await this.prisma.order.findMany({
@@ -141,7 +150,9 @@ export class DashboardService {
 
   async getChartsData() {
     const now = new Date();
-    const months = Array.from({ length: 6 }).map((_, i) => subMonths(now, 5 - i));
+    const months = Array.from({ length: 6 }).map((_, i) =>
+      subMonths(now, 5 - i),
+    );
 
     const chartData: any[] = [];
 
@@ -200,15 +211,53 @@ export class DashboardService {
     }
 
     // Baseline dummy analytics data if no transaction history exists (to WOW the user on initial install)
-    const isDbEmpty = chartData.every(d => d.revenue === 0 && d.expenses === 0 && d.orders === 0);
+    const isDbEmpty = chartData.every(
+      (d) => d.revenue === 0 && d.expenses === 0 && d.orders === 0,
+    );
     if (isDbEmpty) {
       return [
-        { month: 'Jan 2026', revenue: 145000, expenses: 85000, profit: 60000, orders: 12 },
-        { month: 'Feb 2026', revenue: 198000, expenses: 110000, profit: 88000, orders: 18 },
-        { month: 'Mar 2026', revenue: 175000, expenses: 95000, profit: 80000, orders: 15 },
-        { month: 'Apr 2026', revenue: 240000, expenses: 130000, profit: 110000, orders: 22 },
-        { month: 'May 2026', revenue: 295000, expenses: 160000, profit: 135000, orders: 28 },
-        { month: 'Jun 2026', revenue: 350000, expenses: 190000, profit: 160000, orders: 32 },
+        {
+          month: 'Jan 2026',
+          revenue: 145000,
+          expenses: 85000,
+          profit: 60000,
+          orders: 12,
+        },
+        {
+          month: 'Feb 2026',
+          revenue: 198000,
+          expenses: 110000,
+          profit: 88000,
+          orders: 18,
+        },
+        {
+          month: 'Mar 2026',
+          revenue: 175000,
+          expenses: 95000,
+          profit: 80000,
+          orders: 15,
+        },
+        {
+          month: 'Apr 2026',
+          revenue: 240000,
+          expenses: 130000,
+          profit: 110000,
+          orders: 22,
+        },
+        {
+          month: 'May 2026',
+          revenue: 295000,
+          expenses: 160000,
+          profit: 135000,
+          orders: 28,
+        },
+        {
+          month: 'Jun 2026',
+          revenue: 350000,
+          expenses: 190000,
+          profit: 160000,
+          orders: 32,
+        },
       ];
     }
 
@@ -277,11 +326,41 @@ export class DashboardService {
     // Fallback baseline for demonstration if database is empty
     if (topCustomers.length === 0) {
       return [
-        { id: '1', name: 'Nokia Solutions', phone: '9876543210', totalSpent: 125000, orderCount: 5 },
-        { id: '2', name: 'Ravi Kumar', phone: '9123456789', totalSpent: 98000, orderCount: 2 },
-        { id: '3', name: 'Sanjana Singh', phone: '9812763450', totalSpent: 45000, orderCount: 3 },
-        { id: '4', name: 'Cognizant Technology', phone: '9003887711', totalSpent: 38000, orderCount: 4 },
-        { id: '5', name: 'Ananya Roy', phone: '8877665544', totalSpent: 15000, orderCount: 1 },
+        {
+          id: '1',
+          name: 'Nokia Solutions',
+          phone: '9876543210',
+          totalSpent: 125000,
+          orderCount: 5,
+        },
+        {
+          id: '2',
+          name: 'Ravi Kumar',
+          phone: '9123456789',
+          totalSpent: 98000,
+          orderCount: 2,
+        },
+        {
+          id: '3',
+          name: 'Sanjana Singh',
+          phone: '9812763450',
+          totalSpent: 45000,
+          orderCount: 3,
+        },
+        {
+          id: '4',
+          name: 'Cognizant Technology',
+          phone: '9003887711',
+          totalSpent: 38000,
+          orderCount: 4,
+        },
+        {
+          id: '5',
+          name: 'Ananya Roy',
+          phone: '8877665544',
+          totalSpent: 15000,
+          orderCount: 1,
+        },
       ];
     }
 

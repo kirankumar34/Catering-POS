@@ -9,7 +9,8 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  const corsOrigin = process.env.CORS_ORIGIN || 'https://catering-pos-brown.vercel.app';
+  const corsOrigin =
+    process.env.CORS_ORIGIN || 'https://catering-pos-brown.vercel.app';
   app.enableCors({
     origin: corsOrigin,
     credentials: true,

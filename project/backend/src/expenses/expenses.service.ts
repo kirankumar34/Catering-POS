@@ -4,10 +4,26 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 
 export const EXPENSE_CATEGORIES = [
-  'GROCERIES', 'VEGETABLES', 'RICE', 'OIL', 'MASALA', 'MILK', 'GAS',
-  'TRANSPORT', 'STAFF_SALARY', 'COOKING_CHARGES', 'SERVING_STAFF',
-  'CLEANING', 'PAPER_PLATES', 'BANANA_LEAF', 'WATER_BOTTLE',
-  'DECORATION', 'RENTAL', 'GENERATOR', 'ADMIN', 'MISC',
+  'GROCERIES',
+  'VEGETABLES',
+  'RICE',
+  'OIL',
+  'MASALA',
+  'MILK',
+  'GAS',
+  'TRANSPORT',
+  'STAFF_SALARY',
+  'COOKING_CHARGES',
+  'SERVING_STAFF',
+  'CLEANING',
+  'PAPER_PLATES',
+  'BANANA_LEAF',
+  'WATER_BOTTLE',
+  'DECORATION',
+  'RENTAL',
+  'GENERATOR',
+  'ADMIN',
+  'MISC',
 ];
 
 @Injectable()
@@ -16,7 +32,9 @@ export class ExpensesService {
 
   async create(dto: CreateExpenseDto) {
     if (dto.orderId) {
-      const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+      const order = await this.prisma.order.findUnique({
+        where: { id: dto.orderId },
+      });
       if (!order) throw new NotFoundException('Order not found');
     }
     return this.prisma.expense.create({
@@ -32,7 +50,13 @@ export class ExpensesService {
     });
   }
 
-  async findAll(query: { page?: number; limit?: number; search?: string; category?: string; orderId?: string }) {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    category?: string;
+    orderId?: string;
+  }) {
     const page = query.page || 1;
     const limit = query.limit || 12;
     const skip = (page - 1) * limit;
@@ -51,13 +75,18 @@ export class ExpensesService {
     const [total, data] = await this.prisma.$transaction([
       this.prisma.expense.count({ where }),
       this.prisma.expense.findMany({
-        where, skip, take: limit,
+        where,
+        skip,
+        take: limit,
         orderBy: { date: 'desc' },
         include: { order: { select: { id: true, orderNumber: true } } },
       }),
     ]);
 
-    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   async findOne(id: string) {
@@ -96,7 +125,7 @@ export class ExpensesService {
     const expenses = await this.prisma.expense.findMany({ where });
     const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const byCategory: Record<string, number> = {};
-    expenses.forEach(e => {
+    expenses.forEach((e) => {
       byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
     });
     return { total, count: expenses.length, byCategory };

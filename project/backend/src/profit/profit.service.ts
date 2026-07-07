@@ -13,7 +13,10 @@ export class ProfitService {
     if (!order) throw new NotFoundException('Order not found');
 
     const revenue = Number(order.grandTotal);
-    const totalExpense = order.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const totalExpense = order.expenses.reduce(
+      (sum, e) => sum + Number(e.amount),
+      0,
+    );
     const netProfit = revenue - totalExpense;
     const profitPercent = revenue > 0 ? (netProfit / revenue) * 100 : 0;
 
@@ -28,10 +31,14 @@ export class ProfitService {
   }
 
   async getForOrder(orderId: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
-    const analysis = await this.prisma.profitAnalysis.findUnique({ where: { orderId } });
+    const analysis = await this.prisma.profitAnalysis.findUnique({
+      where: { orderId },
+    });
     if (!analysis) {
       return this.calculateForOrder(orderId);
     }
@@ -40,15 +47,21 @@ export class ProfitService {
 
   async getOverallSummary() {
     const [orders, expenses, analyses] = await this.prisma.$transaction([
-      this.prisma.order.aggregate({ _sum: { grandTotal: true }, where: { status: { not: 'CANCELLED' } } }),
+      this.prisma.order.aggregate({
+        _sum: { grandTotal: true },
+        where: { status: { not: 'CANCELLED' } },
+      }),
       this.prisma.expense.aggregate({ _sum: { amount: true } }),
-      this.prisma.profitAnalysis.aggregate({ _sum: { netProfit: true, totalExpense: true } }),
+      this.prisma.profitAnalysis.aggregate({
+        _sum: { netProfit: true, totalExpense: true },
+      }),
     ]);
 
     const totalRevenue = Number(orders._sum.grandTotal || 0);
     const totalExpenses = Number(expenses._sum.amount || 0);
     const netProfit = totalRevenue - totalExpenses;
-    const profitPercent = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    const profitPercent =
+      totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
     return { totalRevenue, totalExpenses, netProfit, profitPercent };
   }

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../../../store/authStore';
 import api from '../../../lib/api';
 import {
   Search, Plus, Loader2, X, IndianRupee,

@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsNumber, IsArray, IsBoolean, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+  Min,
+} from 'class-validator';
 
 export class UpdateMenuDto {
   @IsString()

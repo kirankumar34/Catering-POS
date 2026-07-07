@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuthStore } from '../../../../store/authStore';
 import api from '../../../../lib/api';
 import { MENU_CATEGORIES } from '../../menus/components/MenuItemForm';
 import {

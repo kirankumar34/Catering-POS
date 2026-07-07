@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -8,7 +12,8 @@ export class CustomersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { name, phone, altPhone, email, gstNumber, notes, addresses } = createCustomerDto;
+    const { name, phone, altPhone, email, gstNumber, notes, addresses } =
+      createCustomerDto;
 
     // 1. Check phone duplicate
     const existingPhone = await this.prisma.customer.findUnique({
@@ -47,13 +52,17 @@ export class CustomersService {
         email,
         gstNumber,
         notes,
-        addresses: addresses && addresses.length > 0 ? {
-          create: addresses.map(addr => ({
-            address: addr.address,
-            location: addr.location,
-            isDefault: addr.isDefault !== undefined ? addr.isDefault : false,
-          })),
-        } : undefined,
+        addresses:
+          addresses && addresses.length > 0
+            ? {
+                create: addresses.map((addr) => ({
+                  address: addr.address,
+                  location: addr.location,
+                  isDefault:
+                    addr.isDefault !== undefined ? addr.isDefault : false,
+                })),
+              }
+            : undefined,
       },
       include: {
         addresses: true,
@@ -143,7 +152,7 @@ export class CustomersService {
     let totalSpending = 0;
     let pendingBalance = 0;
 
-    customer.orders.forEach(order => {
+    customer.orders.forEach((order) => {
       totalSpending += Number(order.grandTotal);
       pendingBalance += Number(order.pendingAmount);
     });
@@ -159,7 +168,8 @@ export class CustomersService {
   }
 
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    const { name, phone, altPhone, email, gstNumber, notes, addresses } = updateCustomerDto;
+    const { name, phone, altPhone, email, gstNumber, notes, addresses } =
+      updateCustomerDto;
 
     // Check if customer exists
     const customer = await this.prisma.customer.findUnique({ where: { id } });
@@ -169,25 +179,37 @@ export class CustomersService {
 
     // Check phone duplicate
     if (phone && phone !== customer.phone) {
-      const existingPhone = await this.prisma.customer.findUnique({ where: { phone } });
+      const existingPhone = await this.prisma.customer.findUnique({
+        where: { phone },
+      });
       if (existingPhone) {
-        throw new BadRequestException('Phone number is already in use by another customer.');
+        throw new BadRequestException(
+          'Phone number is already in use by another customer.',
+        );
       }
     }
 
     // Check email duplicate
     if (email && email !== customer.email) {
-      const existingEmail = await this.prisma.customer.findFirst({ where: { email } });
+      const existingEmail = await this.prisma.customer.findFirst({
+        where: { email },
+      });
       if (existingEmail) {
-        throw new BadRequestException('Email address is already in use by another customer.');
+        throw new BadRequestException(
+          'Email address is already in use by another customer.',
+        );
       }
     }
 
     // Check GST duplicate
     if (gstNumber && gstNumber !== customer.gstNumber) {
-      const existingGst = await this.prisma.customer.findFirst({ where: { gstNumber } });
+      const existingGst = await this.prisma.customer.findFirst({
+        where: { gstNumber },
+      });
       if (existingGst) {
-        throw new BadRequestException('GST number is already in use by another customer.');
+        throw new BadRequestException(
+          'GST number is already in use by another customer.',
+        );
       }
     }
 
@@ -203,7 +225,7 @@ export class CustomersService {
         // Recreate new addresses
         if (addresses.length > 0) {
           await tx.customerAddress.createMany({
-            data: addresses.map(addr => ({
+            data: addresses.map((addr) => ({
               customerId: id,
               address: addr.address,
               location: addr.location,
@@ -251,7 +273,7 @@ export class CustomersService {
     // Prevent deletion if customer has orders
     if (customer._count.orders > 0) {
       throw new BadRequestException(
-        'Cannot delete customer with active order history. Archive or cancel their orders first.'
+        'Cannot delete customer with active order history. Archive or cancel their orders first.',
       );
     }
 

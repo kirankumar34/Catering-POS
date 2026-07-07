@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsEmail, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateCustomerAddressDto } from './create-customer.dto';
 

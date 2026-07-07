@@ -8,11 +8,17 @@ export class ProfitController {
   constructor(private readonly profitService: ProfitService) {}
 
   @Get('summary')
-  getOverallSummary() { return this.profitService.getOverallSummary(); }
+  getOverallSummary() {
+    return this.profitService.getOverallSummary();
+  }
 
   @Get('order/:orderId')
-  getForOrder(@Param('orderId') orderId: string) { return this.profitService.getForOrder(orderId); }
+  getForOrder(@Param('orderId') orderId: string) {
+    return this.profitService.getForOrder(orderId);
+  }
 
   @Post('order/:orderId/calculate')
-  calculate(@Param('orderId') orderId: string) { return this.profitService.calculateForOrder(orderId); }
+  calculate(@Param('orderId') orderId: string) {
+    return this.profitService.calculateForOrder(orderId);
+  }
 }

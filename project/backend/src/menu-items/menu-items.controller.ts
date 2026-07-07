@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -23,7 +33,7 @@ export class MenuItemsController {
     @Query('search') search?: string,
     @Query('category') category?: string,
     @Query('page') page?: string,
-    @Query('limit') limit?: string
+    @Query('limit') limit?: string,
   ) {
     return this.menuItemsService.findAll({
       search,
@@ -41,7 +51,10 @@ export class MenuItemsController {
   @Put(':id')
   @Roles('SUPER_ADMIN', 'OWNER')
   @UseGuards(RolesGuard)
-  update(@Param('id') id: string, @Body() updateMenuItemDto: UpdateMenuItemDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateMenuItemDto: UpdateMenuItemDto,
+  ) {
     return this.menuItemsService.update(id, updateMenuItemDto);
   }
 

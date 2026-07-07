@@ -54,11 +54,17 @@ export class NotificationsService {
       }
     }
 
-    this.logger.log(`Reminder check completed. Created ${createdCount} notification(s).`);
+    this.logger.log(
+      `Reminder check completed. Created ${createdCount} notification(s).`,
+    );
     return { status: 'success', created: createdCount };
   }
 
-  private async createNotification(orderId: string, type: string, message: string): Promise<boolean> {
+  private async createNotification(
+    orderId: string,
+    type: string,
+    message: string,
+  ): Promise<boolean> {
     const existing = await this.prisma.notification.findFirst({
       where: { orderId, type },
     });

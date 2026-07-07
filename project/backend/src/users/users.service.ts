@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -128,7 +132,9 @@ export class UsersService {
     });
 
     if (targetUser?.role.name === 'SUPER_ADMIN' && count <= 1) {
-      throw new BadRequestException('Cannot delete the last remaining Super Admin');
+      throw new BadRequestException(
+        'Cannot delete the last remaining Super Admin',
+      );
     }
 
     await this.prisma.user.delete({ where: { id } });
