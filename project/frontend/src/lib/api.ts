@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://catering-pos-nextpublicapiurl.up.railway.app',
   headers: {
     'Content-Type': 'application/json',
   },
