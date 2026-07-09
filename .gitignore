@@ -1,0 +1,21 @@
+# Ignore heavy zip files
+*.zip
+project/backend/backend.zip
+project/frontend/frontend.zip
+project.zip
+
+# Ignore dependencies
+node_modules/
+project/backend/node_modules/
+project/frontend/node_modules/
+project/backend/dist/
+project/frontend/.next/
+
+# Ignore environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+project/backend/.env
+project/frontend/.env.local

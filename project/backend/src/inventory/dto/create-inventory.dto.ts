@@ -6,6 +6,8 @@ import {
   IsOptional,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class CreateInventoryDto {
   @IsString()
   @IsNotEmpty()
@@ -14,6 +16,7 @@ export class CreateInventoryDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   currentStock?: number;
 
   @IsString()
@@ -23,11 +26,13 @@ export class CreateInventoryDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   lowStockThreshold?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   purchaseCost?: number;
 
   @IsString()

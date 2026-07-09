@@ -6,10 +6,13 @@ import {
   IsDateString,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class UpdateExpenseDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   amount?: number;
 
   @IsString()

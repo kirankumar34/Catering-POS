@@ -1,0 +1,23 @@
+# Ignore all zip files
+*.zip
+**/*.zip
+
+# Ignore all dependencies
+node_modules/
+**/node_modules/
+
+# Ignore build outputs
+**/dist/
+**/.next/
+**/.cache/
+
+# Ignore environment files
+.env
+.env.local
+**/ .env*
+**/.env
+**/.env.local
+
+# Ignore git
+.git/
+.github/

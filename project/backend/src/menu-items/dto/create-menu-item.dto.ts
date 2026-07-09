@@ -7,6 +7,8 @@ import {
   Min,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class CreateMenuItemDto {
   @IsString()
   @IsNotEmpty()
@@ -22,6 +24,7 @@ export class CreateMenuItemDto {
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   price: number;
 
   @IsString()

@@ -12,7 +12,7 @@ export class MenusService {
   constructor(private prisma: PrismaService) {}
 
   async create(createMenuDto: CreateMenuDto) {
-    const { name, description, pricePerPlate, itemIds } = createMenuDto;
+    const { name, description, pricePerPlate, status, itemIds } = createMenuDto;
 
     // 1. Check duplicate package name
     const existing = await this.prisma.menu.findFirst({
@@ -33,6 +33,7 @@ export class MenusService {
         name,
         description,
         pricePerPlate,
+        status,
         items:
           itemIds && itemIds.length > 0
             ? {

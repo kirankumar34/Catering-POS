@@ -17,10 +17,12 @@ class UpdateOrderItemDto {
 
   @IsInt()
   @Min(1)
+  @Type(() => Number)
   quantity: number;
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   rate: number;
 }
 
@@ -48,36 +50,43 @@ export class UpdateOrderDto {
   @IsInt()
   @Min(1)
   @IsOptional()
+  @Type(() => Number)
   numberOfPlates?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   pricePerPlate?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   discount?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   gst?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   additionalCost?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   deliveryCharges?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   advancePaid?: number;
 
   @IsString()

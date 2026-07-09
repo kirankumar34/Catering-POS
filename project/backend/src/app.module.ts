@@ -19,6 +19,7 @@ import { ActivityLogModule } from './activity-log/activity-log.module';
 import { SettingsModule } from './settings/settings.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ChecklistModule } from './checklist/checklist.module';
+import { PaymentSettingsModule } from './payment-settings/payment-settings.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ChecklistModule } from './checklist/checklist.module';
     SettingsModule,
     NotificationsModule,
     ChecklistModule,
+    PaymentSettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${publicSans.variable} ${libreCaslon.variable} antialiased min-h-screen bg-background text-foreground`}
       >

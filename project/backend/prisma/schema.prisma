@@ -234,3 +234,39 @@ model OrderChecklistItem {
   orderIndex Int      @default(0)
   order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
+
+model PaymentSetting {
+  id                  String   @id @default(uuid())
+
+  accountHolderName   String
+  bankName            String
+  accountNumber       String
+  ifscCode            String
+  branchName          String
+  swiftCode           String?
+  accountType         String?  // "Savings" or "Current"
+
+  upiId               String?
+  phone               String?  // UPI Phone Number
+  gpayNumber          String?
+  phonepeNumber       String?
+  paytmNumber         String?
+
+  qrImage             String?  // Path to uploaded QR code image
+
+  instructions        String?  // Multi-line payment instructions
+
+  showBank            Boolean  @default(true)
+  showQR              Boolean  @default(true)
+  showUPI             Boolean  @default(true)
+  showInstructions    Boolean  @default(true)
+  showAccountHolder   Boolean  @default(true)
+  showBranch          Boolean  @default(true)
+  showIFSC            Boolean  @default(true)
+
+  isDefault           Boolean  @default(false)
+  activePaymentMethod String   @default("Bank + UPI") // "Bank Transfer" | "UPI" | "Bank + UPI" | "Cash" | "Cheque"
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}

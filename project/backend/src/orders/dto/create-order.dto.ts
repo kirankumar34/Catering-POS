@@ -18,10 +18,12 @@ export class CreateOrderItemDto {
 
   @IsInt()
   @Min(1)
+  @Type(() => Number)
   quantity: number;
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   rate: number;
 }
 
@@ -47,35 +49,42 @@ export class CreateOrderDto {
 
   @IsInt()
   @Min(1)
+  @Type(() => Number)
   numberOfPlates: number;
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   pricePerPlate: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   discount?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   gst?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   additionalCost?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   deliveryCharges?: number;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
+  @Type(() => Number)
   advancePaid?: number;
 
   @IsString()

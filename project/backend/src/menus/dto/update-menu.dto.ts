@@ -6,6 +6,7 @@ import {
   IsBoolean,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateMenuDto {
   @IsString()
@@ -19,6 +20,7 @@ export class UpdateMenuDto {
   @IsNumber()
   @IsOptional()
   @Min(0)
+  @Type(() => Number)
   pricePerPlate?: number;
 
   @IsBoolean()

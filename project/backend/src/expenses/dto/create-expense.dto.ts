@@ -7,9 +7,12 @@ import {
   IsDateString,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class CreateExpenseDto {
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   amount: number;
 
   @IsString()

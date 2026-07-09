@@ -8,6 +8,8 @@ import {
   IsIn,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class CreatePaymentDto {
   @IsString()
   @IsNotEmpty()
@@ -15,6 +17,7 @@ export class CreatePaymentDto {
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   amount: number;
 
   @IsDateString()

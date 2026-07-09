@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import ResponsiveDataList, { ColumnDef, CardFieldDef } from '../../../components/ui/ResponsiveDataList';
+import PaymentSettings from '../../../components/PaymentSettings';
 
 interface StaffUser {
   id: string;
@@ -36,7 +37,7 @@ const SettingsPage = () => {
   const queryClient = useQueryClient();
   const { user, token } = useAuthStore();
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'users' | 'audit'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'payment' | 'users' | 'audit'>('profile');
   const [profileForm, setProfileForm] = useState({ businessName: '', proprietorName: '', gstin: '', phone: '', address: '', upiId: '', invoicePrefix: 'INV', gstRate: '5' });
   const [userForm, setUserForm] = useState({ username: '', email: '', password: '', roleName: 'STAFF' });
   const [showAddUser, setShowAddUser] = useState(false);
@@ -205,6 +206,7 @@ const SettingsPage = () => {
       {/* Navigation tabs */}
       <div className="flex gap-2 border-b border-border pb-px">
         <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors cursor-pointer min-h-[44px] ${activeTab === 'profile' ? 'border-primary text-foreground font-bold' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>Business Profile</button>
+        <button onClick={() => setActiveTab('payment')} className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors cursor-pointer min-h-[44px] ${activeTab === 'payment' ? 'border-primary text-foreground font-bold' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>Payment Settings</button>
         {!isStaff && (
           <>
             <button onClick={() => setActiveTab('users')} className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors cursor-pointer min-h-[44px] ${activeTab === 'users' ? 'border-primary text-foreground font-bold' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>User Management</button>
@@ -293,6 +295,11 @@ const SettingsPage = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Tab 1.5: Payment Settings */}
+      {activeTab === 'payment' && (
+        <PaymentSettings isStaff={isStaff} />
       )}
 
       {/* Tab 2: User Management */}

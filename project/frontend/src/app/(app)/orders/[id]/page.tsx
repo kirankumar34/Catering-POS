@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../../store/authStore';
 import api from '../../../../lib/api';
-import QRCode from 'qrcode';
+
 import {
   ArrowLeft,
   Edit2,
@@ -153,9 +153,11 @@ const OrderDetailPage = () => {
     if (order) {
       const amount = order.pendingAmount > 0 ? order.pendingAmount : order.grandTotal;
       const upiLink = `upi://pay?pa=${bizUpiId}&pn=${encodeURIComponent(bizName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(order.orderNumber)}`;
-      QRCode.toDataURL(upiLink, { width: 200, margin: 1 })
-        .then((url) => setQrCodeUrl(url))
-        .catch((err) => console.error('Failed to generate QR:', err));
+      import('qrcode').then((QRCode) => {
+        QRCode.default.toDataURL(upiLink, { width: 200, margin: 1 })
+          .then((url) => setQrCodeUrl(url))
+          .catch((err) => console.error('Failed to generate QR:', err));
+      });
     }
   }, [bizUpiId, bizName, order]);
 

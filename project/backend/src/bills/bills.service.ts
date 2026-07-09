@@ -83,12 +83,17 @@ export class BillsService {
     const getSetting = (key: string, defaultValue: string) =>
       settingsMap.get(key) || defaultValue;
 
+    // Fetch default payment setting
+    const defaultPayment = await this.prisma.paymentSetting.findFirst({
+      where: { isDefault: true },
+    });
+
     const bizName = getSetting('businessName', COMPANY.name);
     const bizAddress = getSetting('address', COMPANY.address);
     const bizPhone = getSetting('phone', COMPANY.phone);
     const bizGstin = settingsMap.get('gstin');
     const bizProprietor = getSetting('proprietorName', COMPANY.proprietor);
-    const bizUpiId = getSetting('upiId', COMPANY.bank.upiId);
+    const bizUpiId = defaultPayment?.upiId || getSetting('upiId', COMPANY.bank.upiId);
 
     // ─── Invoice/Quotation Number ───────────────────────────────────────
     let docNumber: string;
@@ -122,17 +127,36 @@ export class BillsService {
     }
 
     // ─── Generate UPI QR Code as data URL buffer ────────────────────────
-    const upiLink = `upi://pay?pa=${bizUpiId}&pn=${encodeURIComponent(getSetting('bankAccountName', bizName))}&am=${Number(order.pendingAmount) > 0 ? Number(order.pendingAmount) : Number(order.grandTotal)}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
+    const activeMethod = defaultPayment ? defaultPayment.activePaymentMethod : 'Bank + UPI';
+    const showQR = defaultPayment ? defaultPayment.showQR : true;
+    const shouldShowQR = showQR && (activeMethod === 'UPI' || activeMethod === 'Bank + UPI');
+
     let qrBuffer: Buffer | null = null;
-    try {
-      const qrDataUrl: string = await QRCode.toDataURL(upiLink, {
-        width: 120,
-        margin: 1,
-      });
-      const base64 = qrDataUrl.split(',')[1];
-      qrBuffer = Buffer.from(base64, 'base64');
-    } catch {
-      // QR generation failed — skip silently
+    let customQrPath: string | null = null;
+
+    if (shouldShowQR) {
+      if (defaultPayment && defaultPayment.qrImage) {
+        const localPath = path.join(process.cwd(), defaultPayment.qrImage.replace(/^\//, ''));
+        if (fs.existsSync(localPath)) {
+          customQrPath = localPath;
+        }
+      }
+
+      if (!customQrPath) {
+        const targetUpiId = defaultPayment?.upiId || bizUpiId;
+        const targetName = defaultPayment?.accountHolderName || getSetting('bankAccountName', bizName);
+        const upiLink = `upi://pay?pa=${targetUpiId}&pn=${encodeURIComponent(targetName)}&am=${Number(order.pendingAmount) > 0 ? Number(order.pendingAmount) : Number(order.grandTotal)}&cu=INR&tn=${encodeURIComponent(docNumber)}`;
+        try {
+          const qrDataUrl: string = await QRCode.toDataURL(upiLink, {
+            width: 120,
+            margin: 1,
+          });
+          const base64 = qrDataUrl.split(',')[1];
+          qrBuffer = Buffer.from(base64, 'base64');
+        } catch {
+          // QR generation failed — skip silently
+        }
+      }
     }
 
     // ─── Prepare PDF ────────────────────────────────────────────────────
@@ -703,66 +727,167 @@ export class BillsService {
     const bankW = W * 0.55;
     const qrX = M + W * 0.62;
 
-    // Bank icon placeholder
-    doc
-      .fontSize(9)
-      .fillColor(BLACK)
-      .font('Helvetica-Bold')
-      .text('BANK PAYMENT DETAILS', bankX, y);
-    y += 14;
+    const showBank = defaultPayment ? defaultPayment.showBank : true;
+    const showUPI = defaultPayment ? defaultPayment.showUPI : true;
+    const showInstructions = defaultPayment ? defaultPayment.showInstructions : true;
+    const showAccountHolder = defaultPayment ? defaultPayment.showAccountHolder : true;
+    const showBranch = defaultPayment ? defaultPayment.showBranch : true;
+    const showIFSC = defaultPayment ? defaultPayment.showIFSC : true;
 
-    const bankFields = [
-      ['Account Name', getSetting('bankAccountName', COMPANY.bank.accountName)],
-      [
-        'Account Number',
-        getSetting('bankAccountNumber', COMPANY.bank.accountNumber),
-      ],
-      ['IFSC Code', getSetting('bankIfscCode', COMPANY.bank.ifscCode)],
-      ['Branch', getSetting('bankBranch', COMPANY.bank.branch)],
-      ['UPI ID', bizUpiId],
-    ];
-
-    const bankStartY = y;
-    for (const [label, value] of bankFields) {
-      doc
-        .fontSize(7.5)
-        .fillColor(DARK_GRAY)
-        .font('Helvetica-Bold')
-        .text(label, bankX + 8, y, { width: 80 });
-      doc
-        .fillColor(DARK_GRAY)
-        .font('Helvetica')
-        .text(`:  ${value}`, bankX + 88, y, { width: bankW - 95 });
-      y += 13;
+    // Bank details fields array
+    const bankFields: [string, string][] = [];
+    if (defaultPayment) {
+      if (showBank) {
+        if (showAccountHolder) {
+          bankFields.push(['Account Name', defaultPayment.accountHolderName]);
+        }
+        bankFields.push(['Bank', defaultPayment.bankName]);
+        bankFields.push(['Account Number', defaultPayment.accountNumber]);
+        if (showIFSC) {
+          bankFields.push(['IFSC Code', defaultPayment.ifscCode]);
+        }
+        if (showBranch) {
+          bankFields.push(['Branch', defaultPayment.branchName]);
+        }
+        if (defaultPayment.swiftCode) {
+          bankFields.push(['SWIFT Code', defaultPayment.swiftCode]);
+        }
+        if (defaultPayment.accountType) {
+          bankFields.push(['Account Type', defaultPayment.accountType]);
+        }
+      }
+      if (showUPI && defaultPayment.upiId) {
+        bankFields.push(['UPI ID', defaultPayment.upiId]);
+      }
+    } else {
+      bankFields.push(['Account Name', getSetting('bankAccountName', COMPANY.bank.accountName)]);
+      bankFields.push(['Bank', 'Indian Bank']);
+      bankFields.push(['Account Number', getSetting('bankAccountNumber', COMPANY.bank.accountNumber)]);
+      bankFields.push(['IFSC Code', getSetting('bankIfscCode', COMPANY.bank.ifscCode)]);
+      bankFields.push(['Branch', getSetting('bankBranch', COMPANY.bank.branch)]);
+      bankFields.push(['UPI ID', bizUpiId]);
     }
 
-    // QR Code
-    doc
-      .fontSize(9)
-      .fillColor(BLACK)
-      .font('Helvetica-Bold')
-      .text('SCAN & PAY', qrX, bankStartY - 14, {
-        width: 120,
-        align: 'center',
+    const bankStartY = y;
+
+    if (activeMethod === 'Cash' || activeMethod === 'Cheque') {
+      doc
+        .fontSize(9)
+        .fillColor(BLACK)
+        .font('Helvetica-Bold')
+        .text('PAYMENT DETAILS', bankX, y);
+      y += 14;
+      doc
+        .fontSize(8.5)
+        .fillColor(DARK_GRAY)
+        .font('Helvetica-Bold')
+        .text(`Payment Method: ${activeMethod}`, bankX + 8, y);
+      y += 20;
+    } else {
+      doc
+        .fontSize(9)
+        .fillColor(BLACK)
+        .font('Helvetica-Bold')
+        .text(activeMethod === 'UPI' ? 'UPI PAYMENT DETAILS' : 'BANK PAYMENT DETAILS', bankX, y);
+      y += 14;
+
+      const renderedFields = bankFields.filter(([label]) => {
+        if (activeMethod === 'UPI') {
+          return label === 'UPI ID';
+        }
+        if (activeMethod === 'Bank Transfer') {
+          return label !== 'UPI ID';
+        }
+        return true; // Bank + UPI
       });
 
-    if (qrBuffer) {
-      try {
-        doc.image(qrBuffer, qrX + 22.5, bankStartY, { width: 75, height: 75 });
-      } catch {
-        // QR render failed
+      // Measure maximum label width dynamically
+      doc.fontSize(7.5).font('Helvetica-Bold');
+      let maxLabelW = 0;
+      for (const [label] of renderedFields) {
+        const w = doc.widthOfString(label);
+        if (w > maxLabelW) {
+          maxLabelW = w;
+        }
+      }
+      const labelColWidth = Math.ceil(maxLabelW);
+
+      for (const [label, value] of renderedFields) {
         doc
-          .fontSize(8)
-          .fillColor(LIGHT_GRAY)
+          .fontSize(7.5)
+          .fillColor(DARK_GRAY)
+          .font('Helvetica-Bold')
+          .text(label, bankX + 8, y, { width: labelColWidth });
+        doc
+          .fillColor(DARK_GRAY)
           .font('Helvetica')
-          .text('(QR code unavailable)', qrX, bankStartY + 20, {
-            width: 120,
-            align: 'center',
-          });
+          .text(`:  ${value}`, bankX + 8 + labelColWidth + 6, y, { width: bankW - labelColWidth - 16 });
+        y += 13;
       }
     }
 
-    y = bankStartY + 85;
+    // QR Code
+    if (shouldShowQR) {
+      doc
+        .fontSize(9)
+        .fillColor(BLACK)
+        .font('Helvetica-Bold')
+        .text('SCAN & PAY', qrX, bankStartY, {
+          width: 120,
+          align: 'center',
+        });
+
+      if (customQrPath) {
+        try {
+          doc.image(customQrPath, qrX + 22.5, bankStartY + 14, { width: 75, height: 75 });
+        } catch {
+          doc
+            .fontSize(8)
+            .fillColor(LIGHT_GRAY)
+            .font('Helvetica')
+            .text('(QR render error)', qrX, bankStartY + 20, {
+              width: 120,
+              align: 'center',
+            });
+        }
+      } else if (qrBuffer) {
+        try {
+          doc.image(qrBuffer, qrX + 22.5, bankStartY + 14, { width: 75, height: 75 });
+        } catch {
+          doc
+            .fontSize(8)
+            .fillColor(LIGHT_GRAY)
+            .font('Helvetica')
+            .text('(QR code unavailable)', qrX, bankStartY + 20, {
+              width: 120,
+              align: 'center',
+            });
+        }
+      }
+    }
+
+    // Instructions
+    const instructions = defaultPayment?.instructions;
+    if (showInstructions && instructions) {
+      y = Math.max(y, bankStartY + 85);
+      doc
+        .fontSize(8)
+        .fillColor(BLACK)
+        .font('Helvetica-Bold')
+        .text('PAYMENT INSTRUCTIONS', bankX, y);
+      y += 12;
+
+      doc
+        .fontSize(7.5)
+        .fillColor(DARK_GRAY)
+        .font('Helvetica')
+        .text(instructions, bankX + 8, y, { width: W - 16 });
+      
+      y += doc.heightOfString(instructions, { width: W - 16 }) + 10;
+    } else {
+      y = Math.max(y, bankStartY + 85);
+    }
+
     drawLine(y);
     y += 20;
 
@@ -777,7 +902,7 @@ export class BillsService {
       .fontSize(8)
       .fillColor(DARK_GRAY)
       .font('Helvetica-Bold')
-      .text('FOR CHOOSING SEISUVAI CATERING', M, y, {
+      .text(`FOR CHOOSING ${bizName.toUpperCase()}`, M, y, {
         width: W,
         align: 'center',
       });

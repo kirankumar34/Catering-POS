@@ -4,8 +4,11 @@ import {
   IsNumber,
   IsOptional,
   IsArray,
+  IsBoolean,
   Min,
 } from 'class-validator';
+
+import { Type } from 'class-transformer';
 
 export class CreateMenuDto {
   @IsString()
@@ -18,7 +21,12 @@ export class CreateMenuDto {
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   pricePerPlate: number;
+
+  @IsBoolean()
+  @IsOptional()
+  status?: boolean;
 
   @IsArray()
   @IsOptional()
