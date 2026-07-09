@@ -3,7 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   // Silence the workspace root lockfile warning
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: process.env.VERCEL ? undefined : path.join(__dirname, "../../"),
 
   webpack: (config, { dev }) => {
     if (dev) {
