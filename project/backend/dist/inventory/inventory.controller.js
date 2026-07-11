@@ -22,12 +22,24 @@ let InventoryController = class InventoryController {
     constructor(inventoryService) {
         this.inventoryService = inventoryService;
     }
-    create(dto) { return this.inventoryService.create(dto); }
-    findAll(page, limit, search, lowStock) { return this.inventoryService.findAll({ page, limit, search, lowStock }); }
-    findOne(id) { return this.inventoryService.findOne(id); }
-    update(id, dto) { return this.inventoryService.update(id, dto); }
-    adjustStock(id, delta) { return this.inventoryService.adjustStock(id, delta); }
-    remove(id) { return this.inventoryService.remove(id); }
+    create(dto) {
+        return this.inventoryService.create(dto);
+    }
+    findAll(page, limit, search, lowStock) {
+        return this.inventoryService.findAll({ page, limit, search, lowStock });
+    }
+    findOne(id) {
+        return this.inventoryService.findOne(id);
+    }
+    update(id, dto) {
+        return this.inventoryService.update(id, dto);
+    }
+    adjustStock(id, delta) {
+        return this.inventoryService.adjustStock(id, delta);
+    }
+    remove(id) {
+        return this.inventoryService.remove(id);
+    }
 };
 exports.InventoryController = InventoryController;
 __decorate([

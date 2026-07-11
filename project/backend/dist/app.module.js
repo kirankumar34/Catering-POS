@@ -28,6 +28,7 @@ const activity_log_module_1 = require("./activity-log/activity-log.module");
 const settings_module_1 = require("./settings/settings.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const checklist_module_1 = require("./checklist/checklist.module");
+const payment_settings_module_1 = require("./payment-settings/payment-settings.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -52,6 +53,7 @@ exports.AppModule = AppModule = __decorate([
             settings_module_1.SettingsModule,
             notifications_module_1.NotificationsModule,
             checklist_module_1.ChecklistModule,
+            payment_settings_module_1.PaymentSettingsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

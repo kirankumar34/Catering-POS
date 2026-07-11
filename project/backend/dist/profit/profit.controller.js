@@ -21,9 +21,15 @@ let ProfitController = class ProfitController {
     constructor(profitService) {
         this.profitService = profitService;
     }
-    getOverallSummary() { return this.profitService.getOverallSummary(); }
-    getForOrder(orderId) { return this.profitService.getForOrder(orderId); }
-    calculate(orderId) { return this.profitService.calculateForOrder(orderId); }
+    getOverallSummary() {
+        return this.profitService.getOverallSummary();
+    }
+    getForOrder(orderId) {
+        return this.profitService.getForOrder(orderId);
+    }
+    calculate(orderId) {
+        return this.profitService.calculateForOrder(orderId);
+    }
 };
 exports.ProfitController = ProfitController;
 __decorate([

@@ -24,10 +24,18 @@ let PaymentsController = class PaymentsController {
     constructor(paymentsService) {
         this.paymentsService = paymentsService;
     }
-    create(dto) { return this.paymentsService.create(dto); }
-    findAll(page, limit, orderId, method) { return this.paymentsService.findAll({ page, limit, orderId, method }); }
-    findOne(id) { return this.paymentsService.findOne(id); }
-    remove(id) { return this.paymentsService.remove(id); }
+    create(dto) {
+        return this.paymentsService.create(dto);
+    }
+    findAll(page, limit, orderId, method) {
+        return this.paymentsService.findAll({ page, limit, orderId, method });
+    }
+    findOne(id) {
+        return this.paymentsService.findOne(id);
+    }
+    remove(id) {
+        return this.paymentsService.remove(id);
+    }
 };
 exports.PaymentsController = PaymentsController;
 __decorate([

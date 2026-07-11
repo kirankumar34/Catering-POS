@@ -26,11 +26,13 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderItemDto.prototype, "quantity", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderItemDto.prototype, "rate", void 0);
 class CreateOrderDto {
@@ -77,41 +79,48 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "numberOfPlates", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "pricePerPlate", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "discount", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "gst", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "additionalCost", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "deliveryCharges", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "advancePaid", void 0);
 __decorate([

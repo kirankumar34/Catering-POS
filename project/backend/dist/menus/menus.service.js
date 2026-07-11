@@ -18,7 +18,7 @@ let MenusService = class MenusService {
         this.prisma = prisma;
     }
     async create(createMenuDto) {
-        const { name, description, pricePerPlate, itemIds } = createMenuDto;
+        const { name, description, pricePerPlate, status, itemIds } = createMenuDto;
         const existing = await this.prisma.menu.findFirst({
             where: {
                 name: { equals: name },
@@ -32,9 +32,12 @@ let MenusService = class MenusService {
                 name,
                 description,
                 pricePerPlate,
-                items: itemIds && itemIds.length > 0 ? {
-                    connect: itemIds.map(id => ({ id })),
-                } : undefined,
+                status,
+                items: itemIds && itemIds.length > 0
+                    ? {
+                        connect: itemIds.map((id) => ({ id })),
+                    }
+                    : undefined,
             },
             include: {
                 items: true,
@@ -127,9 +130,11 @@ let MenusService = class MenusService {
                 description,
                 pricePerPlate,
                 status,
-                items: itemIds !== undefined ? {
-                    set: itemIds.map(itemId => ({ id: itemId })),
-                } : undefined,
+                items: itemIds !== undefined
+                    ? {
+                        set: itemIds.map((itemId) => ({ id: itemId })),
+                    }
+                    : undefined,
             },
             include: {
                 items: true,

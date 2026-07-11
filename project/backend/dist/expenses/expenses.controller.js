@@ -25,12 +25,30 @@ let ExpensesController = class ExpensesController {
     constructor(expensesService) {
         this.expensesService = expensesService;
     }
-    create(dto) { return this.expensesService.create(dto); }
-    findAll(page, limit, search, category, orderId) { return this.expensesService.findAll({ page, limit, search, category, orderId }); }
-    getSummary(orderId) { return this.expensesService.getSummary(orderId); }
-    findOne(id) { return this.expensesService.findOne(id); }
-    update(id, dto) { return this.expensesService.update(id, dto); }
-    remove(id) { return this.expensesService.remove(id); }
+    create(dto) {
+        return this.expensesService.create(dto);
+    }
+    findAll(page, limit, search, category, orderId) {
+        return this.expensesService.findAll({
+            page,
+            limit,
+            search,
+            category,
+            orderId,
+        });
+    }
+    getSummary(orderId) {
+        return this.expensesService.getSummary(orderId);
+    }
+    findOne(id) {
+        return this.expensesService.findOne(id);
+    }
+    update(id, dto) {
+        return this.expensesService.update(id, dto);
+    }
+    remove(id) {
+        return this.expensesService.remove(id);
+    }
 };
 exports.ExpensesController = ExpensesController;
 __decorate([

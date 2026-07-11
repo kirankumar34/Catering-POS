@@ -36,10 +36,14 @@ let ProfitService = class ProfitService {
         return analysis;
     }
     async getForOrder(orderId) {
-        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
-        const analysis = await this.prisma.profitAnalysis.findUnique({ where: { orderId } });
+        const analysis = await this.prisma.profitAnalysis.findUnique({
+            where: { orderId },
+        });
         if (!analysis) {
             return this.calculateForOrder(orderId);
         }
@@ -47,9 +51,14 @@ let ProfitService = class ProfitService {
     }
     async getOverallSummary() {
         const [orders, expenses, analyses] = await this.prisma.$transaction([
-            this.prisma.order.aggregate({ _sum: { grandTotal: true }, where: { status: { not: 'CANCELLED' } } }),
+            this.prisma.order.aggregate({
+                _sum: { grandTotal: true },
+                where: { status: { not: 'CANCELLED' } },
+            }),
             this.prisma.expense.aggregate({ _sum: { amount: true } }),
-            this.prisma.profitAnalysis.aggregate({ _sum: { netProfit: true, totalExpense: true } }),
+            this.prisma.profitAnalysis.aggregate({
+                _sum: { netProfit: true, totalExpense: true },
+            }),
         ]);
         const totalRevenue = Number(orders._sum.grandTotal || 0);
         const totalExpenses = Number(expenses._sum.amount || 0);

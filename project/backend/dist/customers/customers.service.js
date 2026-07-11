@@ -49,13 +49,15 @@ let CustomersService = class CustomersService {
                 email,
                 gstNumber,
                 notes,
-                addresses: addresses && addresses.length > 0 ? {
-                    create: addresses.map(addr => ({
-                        address: addr.address,
-                        location: addr.location,
-                        isDefault: addr.isDefault !== undefined ? addr.isDefault : false,
-                    })),
-                } : undefined,
+                addresses: addresses && addresses.length > 0
+                    ? {
+                        create: addresses.map((addr) => ({
+                            address: addr.address,
+                            location: addr.location,
+                            isDefault: addr.isDefault !== undefined ? addr.isDefault : false,
+                        })),
+                    }
+                    : undefined,
             },
             include: {
                 addresses: true,
@@ -131,7 +133,7 @@ let CustomersService = class CustomersService {
         }
         let totalSpending = 0;
         let pendingBalance = 0;
-        customer.orders.forEach(order => {
+        customer.orders.forEach((order) => {
             totalSpending += Number(order.grandTotal);
             pendingBalance += Number(order.pendingAmount);
         });
@@ -151,19 +153,25 @@ let CustomersService = class CustomersService {
             throw new common_1.NotFoundException(`Customer with ID ${id} not found.`);
         }
         if (phone && phone !== customer.phone) {
-            const existingPhone = await this.prisma.customer.findUnique({ where: { phone } });
+            const existingPhone = await this.prisma.customer.findUnique({
+                where: { phone },
+            });
             if (existingPhone) {
                 throw new common_1.BadRequestException('Phone number is already in use by another customer.');
             }
         }
         if (email && email !== customer.email) {
-            const existingEmail = await this.prisma.customer.findFirst({ where: { email } });
+            const existingEmail = await this.prisma.customer.findFirst({
+                where: { email },
+            });
             if (existingEmail) {
                 throw new common_1.BadRequestException('Email address is already in use by another customer.');
             }
         }
         if (gstNumber && gstNumber !== customer.gstNumber) {
-            const existingGst = await this.prisma.customer.findFirst({ where: { gstNumber } });
+            const existingGst = await this.prisma.customer.findFirst({
+                where: { gstNumber },
+            });
             if (existingGst) {
                 throw new common_1.BadRequestException('GST number is already in use by another customer.');
             }
@@ -175,7 +183,7 @@ let CustomersService = class CustomersService {
                 });
                 if (addresses.length > 0) {
                     await tx.customerAddress.createMany({
-                        data: addresses.map(addr => ({
+                        data: addresses.map((addr) => ({
                             customerId: id,
                             address: addr.address,
                             location: addr.location,

@@ -18,7 +18,9 @@ let ChecklistService = class ChecklistService {
         this.prisma = prisma;
     }
     async getChecklistForOrder(orderId) {
-        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
         return this.prisma.orderChecklistItem.findMany({
@@ -27,7 +29,9 @@ let ChecklistService = class ChecklistService {
         });
     }
     async addChecklistItem(orderId, label) {
-        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
         const maxItem = await this.prisma.orderChecklistItem.findFirst({
@@ -44,7 +48,9 @@ let ChecklistService = class ChecklistService {
         });
     }
     async updateChecklistItem(id, checked) {
-        const item = await this.prisma.orderChecklistItem.findUnique({ where: { id } });
+        const item = await this.prisma.orderChecklistItem.findUnique({
+            where: { id },
+        });
         if (!item)
             throw new common_1.NotFoundException('Checklist item not found');
         return this.prisma.orderChecklistItem.update({
@@ -56,14 +62,18 @@ let ChecklistService = class ChecklistService {
         });
     }
     async deleteChecklistItem(id) {
-        const item = await this.prisma.orderChecklistItem.findUnique({ where: { id } });
+        const item = await this.prisma.orderChecklistItem.findUnique({
+            where: { id },
+        });
         if (!item)
             throw new common_1.NotFoundException('Checklist item not found');
         await this.prisma.orderChecklistItem.delete({ where: { id } });
         return { success: true };
     }
     async loadFromTemplate(orderId, templateId) {
-        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
         const template = await this.prisma.checklistTemplate.findUnique({

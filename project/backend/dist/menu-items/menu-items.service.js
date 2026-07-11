@@ -96,7 +96,8 @@ let MenuItemsService = class MenuItemsService {
         if (!item) {
             throw new common_1.NotFoundException(`Menu item with ID ${id} not found.`);
         }
-        if (name && (name !== item.name || (category && category !== item.category))) {
+        if (name &&
+            (name !== item.name || (category && category !== item.category))) {
             const targetCategory = category || item.category;
             const existing = await this.prisma.menuItem.findFirst({
                 where: {

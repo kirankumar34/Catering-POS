@@ -29,7 +29,11 @@ let CustomersController = class CustomersController {
         return this.customersService.create(createCustomerDto);
     }
     findAll(search, page, limit) {
-        return this.customersService.findAll({ search, page: page ? parseInt(page) : undefined, limit: limit ? parseInt(limit) : undefined });
+        return this.customersService.findAll({
+            search,
+            page: page ? parseInt(page) : undefined,
+            limit: limit ? parseInt(limit) : undefined,
+        });
     }
     findOne(id) {
         return this.customersService.findOne(id);

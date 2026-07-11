@@ -91,7 +91,11 @@ let OrdersService = class OrdersService {
             include: {
                 customer: { select: { id: true, name: true, phone: true } },
                 menu: { select: { id: true, name: true } },
-                items: { include: { item: { select: { id: true, name: true, category: true } } } },
+                items: {
+                    include: {
+                        item: { select: { id: true, name: true, category: true } },
+                    },
+                },
             },
         });
         return order;
@@ -144,12 +148,16 @@ let OrdersService = class OrdersService {
                 },
                 menu: {
                     include: {
-                        items: { select: { id: true, name: true, category: true, isVeg: true } },
+                        items: {
+                            select: { id: true, name: true, category: true, isVeg: true },
+                        },
                     },
                 },
                 items: {
                     include: {
-                        item: { select: { id: true, name: true, category: true, isVeg: true } },
+                        item: {
+                            select: { id: true, name: true, category: true, isVeg: true },
+                        },
                     },
                 },
                 bills: true,
@@ -200,7 +208,8 @@ let OrdersService = class OrdersService {
                 pendingAmount,
                 ...(dto.notes !== undefined && { notes: dto.notes }),
                 ...(dto.status && { status: dto.status }),
-                ...(dto.items && dto.items.length > 0 && {
+                ...(dto.items &&
+                    dto.items.length > 0 && {
                     items: {
                         create: dto.items.map((item) => ({
                             itemId: item.itemId,
@@ -213,7 +222,11 @@ let OrdersService = class OrdersService {
             include: {
                 customer: { select: { id: true, name: true, phone: true } },
                 menu: { select: { id: true, name: true } },
-                items: { include: { item: { select: { id: true, name: true, category: true } } } },
+                items: {
+                    include: {
+                        item: { select: { id: true, name: true, category: true } },
+                    },
+                },
             },
         });
         return order;

@@ -13,10 +13,26 @@ exports.ExpensesService = exports.EXPENSE_CATEGORIES = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 exports.EXPENSE_CATEGORIES = [
-    'GROCERIES', 'VEGETABLES', 'RICE', 'OIL', 'MASALA', 'MILK', 'GAS',
-    'TRANSPORT', 'STAFF_SALARY', 'COOKING_CHARGES', 'SERVING_STAFF',
-    'CLEANING', 'PAPER_PLATES', 'BANANA_LEAF', 'WATER_BOTTLE',
-    'DECORATION', 'RENTAL', 'GENERATOR', 'ADMIN', 'MISC',
+    'GROCERIES',
+    'VEGETABLES',
+    'RICE',
+    'OIL',
+    'MASALA',
+    'MILK',
+    'GAS',
+    'TRANSPORT',
+    'STAFF_SALARY',
+    'COOKING_CHARGES',
+    'SERVING_STAFF',
+    'CLEANING',
+    'PAPER_PLATES',
+    'BANANA_LEAF',
+    'WATER_BOTTLE',
+    'DECORATION',
+    'RENTAL',
+    'GENERATOR',
+    'ADMIN',
+    'MISC',
 ];
 let ExpensesService = class ExpensesService {
     prisma;
@@ -25,7 +41,9 @@ let ExpensesService = class ExpensesService {
     }
     async create(dto) {
         if (dto.orderId) {
-            const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+            const order = await this.prisma.order.findUnique({
+                where: { id: dto.orderId },
+            });
             if (!order)
                 throw new common_1.NotFoundException('Order not found');
         }
@@ -60,12 +78,17 @@ let ExpensesService = class ExpensesService {
         const [total, data] = await this.prisma.$transaction([
             this.prisma.expense.count({ where }),
             this.prisma.expense.findMany({
-                where, skip, take: limit,
+                where,
+                skip,
+                take: limit,
                 orderBy: { date: 'desc' },
                 include: { order: { select: { id: true, orderNumber: true } } },
             }),
         ]);
-        return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+        return {
+            data,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        };
     }
     async findOne(id) {
         const expense = await this.prisma.expense.findUnique({
@@ -101,7 +124,7 @@ let ExpensesService = class ExpensesService {
         const expenses = await this.prisma.expense.findMany({ where });
         const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
         const byCategory = {};
-        expenses.forEach(e => {
+        expenses.forEach((e) => {
             byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
         });
         return { total, count: expenses.length, byCategory };
