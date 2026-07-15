@@ -111,6 +111,7 @@ model Order {
   @@index([eventDate])
   @@index([customerId, eventDate])
   @@index([createdAt])
+  @@index([status])
 }
 
 model OrderItem {
@@ -149,6 +150,9 @@ model Payment {
   transactionId String?
   notes         String?
   createdAt     DateTime @default(now())
+
+  @@index([paymentDate])
+  @@index([orderId])
 }
 
 model Expense {
@@ -161,6 +165,9 @@ model Expense {
   orderId     String?  // Optional link to specific catering order
   order       Order?   @relation(fields: [orderId], references: [id])
   createdAt   DateTime @default(now())
+
+  @@index([date])
+  @@index([orderId])
 }
 
 model Inventory {

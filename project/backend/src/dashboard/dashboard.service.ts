@@ -20,119 +20,132 @@ export class DashboardService {
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
 
-    // 1. Today's Orders
-    const todayOrdersCount = await this.prisma.order.count({
-      where: {
-        eventDate: {
-          gte: todayStart,
-          lte: todayEnd,
-        },
-      },
-    });
-
-    // 2. Today's Revenue (Payments received today)
-    const todayPayments = await this.prisma.payment.aggregate({
-      where: {
-        paymentDate: {
-          gte: todayStart,
-          lte: todayEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
-    const todayRevenue = todayPayments._sum.amount || 0;
-
-    // 3. Pending Payments (Unpaid balances on all active/completed orders)
-    const pendingPaymentsAgg = await this.prisma.order.aggregate({
-      where: {
-        status: {
-          in: ['PENDING', 'CONFIRMED', 'COMPLETED'],
-        },
-      },
-      _sum: {
-        pendingAmount: true,
-      },
-    });
-    const pendingPayments = pendingPaymentsAgg._sum.pendingAmount || 0;
-
-    // 4. Completed Orders
-    const completedOrdersCount = await this.prisma.order.count({
-      where: {
-        status: 'COMPLETED',
-      },
-    });
-
-    // 5. Monthly Revenue (Payments received in the current month)
-    const monthlyPayments = await this.prisma.payment.aggregate({
-      where: {
-        paymentDate: {
-          gte: monthStart,
-          lte: monthEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
-    const monthlyRevenue = Number(monthlyPayments._sum.amount || 0);
-
-    // 6. Monthly Expenses
-    const monthlyExpensesAgg = await this.prisma.expense.aggregate({
-      where: {
-        date: {
-          gte: monthStart,
-          lte: monthEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
-    const monthlyExpenses = Number(monthlyExpensesAgg._sum.amount || 0);
-
-    // 7. Profit (Estimate or Sum from ProfitAnalysis)
-    const monthlyProfitAgg = await this.prisma.profitAnalysis.aggregate({
-      where: {
-        order: {
+    // 1-8. Parallelized queries using Promise.all
+    const [
+      todayOrdersCount,
+      todayPayments,
+      pendingPaymentsAgg,
+      completedOrdersCount,
+      monthlyPayments,
+      monthlyExpensesAgg,
+      monthlyProfitAgg,
+      upcomingEvents,
+    ] = await Promise.all([
+      // 1. Today's Orders
+      this.prisma.order.count({
+        where: {
           eventDate: {
+            gte: todayStart,
+            lte: todayEnd,
+          },
+        },
+      }),
+
+      // 2. Today's Revenue (Payments received today)
+      this.prisma.payment.aggregate({
+        where: {
+          paymentDate: {
+            gte: todayStart,
+            lte: todayEnd,
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+
+      // 3. Pending Payments (Unpaid balances on all active/completed orders)
+      this.prisma.order.aggregate({
+        where: {
+          status: {
+            in: ['PENDING', 'CONFIRMED', 'COMPLETED'],
+          },
+        },
+        _sum: {
+          pendingAmount: true,
+        },
+      }),
+
+      // 4. Completed Orders
+      this.prisma.order.count({
+        where: {
+          status: 'COMPLETED',
+        },
+      }),
+
+      // 5. Monthly Revenue (Payments received in the current month)
+      this.prisma.payment.aggregate({
+        where: {
+          paymentDate: {
             gte: monthStart,
             lte: monthEnd,
           },
         },
-      },
-      _sum: {
-        netProfit: true,
-      },
-    });
+        _sum: {
+          amount: true,
+        },
+      }),
+
+      // 6. Monthly Expenses
+      this.prisma.expense.aggregate({
+        where: {
+          date: {
+            gte: monthStart,
+            lte: monthEnd,
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+
+      // 7. Profit (Estimate or Sum from ProfitAnalysis)
+      this.prisma.profitAnalysis.aggregate({
+        where: {
+          order: {
+            eventDate: {
+              gte: monthStart,
+              lte: monthEnd,
+            },
+          },
+        },
+        _sum: {
+          netProfit: true,
+        },
+      }),
+
+      // 8. Upcoming Events (Next 5 events)
+      this.prisma.order.findMany({
+        where: {
+          eventDate: {
+            gte: todayStart,
+          },
+          status: {
+            in: ['PENDING', 'CONFIRMED'],
+          },
+        },
+        take: 5,
+        orderBy: {
+          eventDate: 'asc',
+        },
+        include: {
+          customer: {
+            select: {
+              name: true,
+              phone: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    const todayRevenue = todayPayments._sum.amount || 0;
+    const pendingPayments = pendingPaymentsAgg._sum.pendingAmount || 0;
+    const monthlyRevenue = Number(monthlyPayments._sum.amount || 0);
+    const monthlyExpenses = Number(monthlyExpensesAgg._sum.amount || 0);
     const monthlyProfit = Number(
       monthlyProfitAgg._sum.netProfit || monthlyRevenue - monthlyExpenses,
     );
-
-    // 8. Upcoming Events (Next 5 events)
-    const upcomingEvents = await this.prisma.order.findMany({
-      where: {
-        eventDate: {
-          gte: todayStart,
-        },
-        status: {
-          in: ['PENDING', 'CONFIRMED'],
-        },
-      },
-      take: 5,
-      orderBy: {
-        eventDate: 'asc',
-      },
-      include: {
-        customer: {
-          select: {
-            name: true,
-            phone: true,
-          },
-        },
-      },
-    });
 
     return {
       kpis: {
@@ -154,61 +167,63 @@ export class DashboardService {
       subMonths(now, 5 - i),
     );
 
-    const chartData: any[] = [];
+    const chartData = await Promise.all(
+      months.map(async (month) => {
+        const monthStart = startOfMonth(month);
+        const monthEnd = endOfMonth(month);
+        const label = format(month, 'MMM yyyy');
 
-    for (const month of months) {
-      const monthStart = startOfMonth(month);
-      const monthEnd = endOfMonth(month);
-      const label = format(month, 'MMM yyyy');
+        const [revAgg, expAgg, ordersCount] = await Promise.all([
+          // Fetch monthly revenue (sum of payments)
+          this.prisma.payment.aggregate({
+            where: {
+              paymentDate: {
+                gte: monthStart,
+                lte: monthEnd,
+              },
+            },
+            _sum: {
+              amount: true,
+            },
+          }),
 
-      // Fetch monthly revenue (sum of payments)
-      const revAgg = await this.prisma.payment.aggregate({
-        where: {
-          paymentDate: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
-      });
+          // Fetch monthly expenses
+          this.prisma.expense.aggregate({
+            where: {
+              date: {
+                gte: monthStart,
+                lte: monthEnd,
+              },
+            },
+            _sum: {
+              amount: true,
+            },
+          }),
 
-      // Fetch monthly expenses
-      const expAgg = await this.prisma.expense.aggregate({
-        where: {
-          date: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
-      });
+          // Fetch monthly orders count
+          this.prisma.order.count({
+            where: {
+              eventDate: {
+                gte: monthStart,
+                lte: monthEnd,
+              },
+            },
+          }),
+        ]);
 
-      // Fetch monthly orders count
-      const ordersCount = await this.prisma.order.count({
-        where: {
-          eventDate: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-      });
+        const revenue = Number(revAgg._sum.amount || 0);
+        const expenses = Number(expAgg._sum.amount || 0);
+        const profit = Math.max(0, revenue - expenses);
 
-      const revenue = Number(revAgg._sum.amount || 0);
-      const expenses = Number(expAgg._sum.amount || 0);
-      const profit = Math.max(0, revenue - expenses);
-
-      chartData.push({
-        month: label,
-        revenue,
-        expenses,
-        profit,
-        orders: ordersCount,
-      });
-    }
+        return {
+          month: label,
+          revenue,
+          expenses,
+          profit,
+          orders: ordersCount,
+        };
+      }),
+    );
 
     // Baseline dummy analytics data if no transaction history exists (to WOW the user on initial install)
     const isDbEmpty = chartData.every(
@@ -302,29 +317,7 @@ export class DashboardService {
       take: 5,
     });
 
-    const topCustomers: any[] = [];
-
-    for (const spend of topSpendings) {
-      const customer = await this.prisma.customer.findUnique({
-        where: { id: spend.customerId },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-        },
-      });
-
-      if (customer) {
-        topCustomers.push({
-          ...customer,
-          totalSpent: spend._sum.grandTotal || 0,
-          orderCount: spend._count.id || 0,
-        });
-      }
-    }
-
-    // Fallback baseline for demonstration if database is empty
-    if (topCustomers.length === 0) {
+    if (topSpendings.length === 0) {
       return [
         {
           id: '1',
@@ -363,6 +356,36 @@ export class DashboardService {
         },
       ];
     }
+
+    const customerIds = topSpendings.map((spend) => spend.customerId);
+    const customers = await this.prisma.customer.findMany({
+      where: {
+        id: {
+          in: customerIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+    });
+
+    const customersMap = new Map(
+      customers.map((customer) => [customer.id, customer]),
+    );
+
+    const topCustomers = topSpendings
+      .map((spend) => {
+        const customer = customersMap.get(spend.customerId);
+        if (!customer) return null;
+        return {
+          ...customer,
+          totalSpent: spend._sum.grandTotal || 0,
+          orderCount: spend._count.id || 0,
+        };
+      })
+      .filter((c) => c !== null);
 
     return topCustomers;
   }
